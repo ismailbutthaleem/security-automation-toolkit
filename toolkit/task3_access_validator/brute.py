@@ -33,7 +33,7 @@ CONSTRAINTS
 - Python 3.10+ only.
 - SSH: must use paramiko. FTP: must use ftplib.
 - time.sleep(0.1) MUST be present between attempts — auto-grader checks this.
-- NO use of input() — all input via argparse.
+- NO use of the input built-in — all input via argparse.
 - Wordlist may contain empty lines and non-ASCII characters — handle both.
 
 OUTPUT CONTRACT (auto-grader depends on this)
@@ -60,8 +60,8 @@ drops. This becomes part of your evidence trail.
 # Your imports go here
 import argparse
 import ftplib
-import time
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 

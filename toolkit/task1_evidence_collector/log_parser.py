@@ -17,7 +17,7 @@ machine-readable — sloppy evidence gets people killed in the field.
 
 WHAT THIS SCRIPT MUST DO
 -------------------------
-1. Accept a log file path as a command-line argument (argparse — NO input()).
+1. Accept a log file path as a command-line argument (argparse — no input built-in).
 2. Use regular expressions (re) to identify lines containing:
    - "Failed password"
    - "Invalid user"
@@ -36,7 +36,7 @@ CONSTRAINTS
 -----------
 - Python 3.10+ only.
 - Standard library only (re, csv, argparse, pathlib).
-- NO use of input() — all input via argparse.
+- NO use of the input built-in — all input via argparse.
 - NO use of os.system() or subprocess.
 
 OUTPUT CONTRACT (auto-grader depends on this)

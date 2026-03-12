@@ -41,7 +41,7 @@ CONSTRAINTS
 - Must use requests and beautifulsoup4 (bs4).
 - Set a request timeout (default 5s) — never hang.
 - Handle redirects gracefully (requests does this by default — be aware of it).
-- NO use of input() — all input via argparse.
+- NO use of the input built-in — all input via argparse.
 
 OUTPUT CONTRACT (auto-grader depends on this)
 ---------------------------------------------
@@ -82,7 +82,10 @@ try:
     import requests
     from bs4 import BeautifulSoup
 except ImportError as e:
-    print(f"[-] Missing dependency: {e}. Run: pip install requests beautifulsoup4", file=sys.stderr)
+    print(
+        f"[-] Missing dependency: {e}. Run: pip install requests beautifulsoup4",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 

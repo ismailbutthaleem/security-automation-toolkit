@@ -1,7 +1,7 @@
 # The Benji Protocol
 
 **COM5413 — Programming for Cyber Security**
-**University of Bolton | HE5**
+**University of Greater Manchester | HE5**
 
 ---
 
@@ -41,16 +41,16 @@ Brief one-line description of each tool as you complete it:
 
 ```bash
 # Task 1
-python toolkit/task1_evidence_collector/log_parser.py <log_file>
+python3 toolkit/task1_evidence_collector/log_parser.py <log_file>
 
 # Task 2
-python toolkit/task2_network_cartographer/scan.py <target_ip> --ports 1-1024
+python3 toolkit/task2_network_cartographer/scan.py <target_ip> --ports 1-1024
 
 # Task 3
-python toolkit/task3_access_validator/brute.py <target_ip> --service ftp --user <user> --wordlist <file>
+python3 toolkit/task3_access_validator/brute.py <target_ip> --service ftp --user <user> --wordlist <file>
 
 # Task 4
-python toolkit/task4_web_enumerator/web_enum.py <url>
+python3 toolkit/task4_web_enumerator/web_enum.py <url>
 ```
 
 ---
@@ -58,7 +58,7 @@ python toolkit/task4_web_enumerator/web_enum.py <url>
 ## Running the Field Tests
 
 ```bash
-pip install pytest
+pip3 install pytest
 pytest field_tests/ -v
 ```
 

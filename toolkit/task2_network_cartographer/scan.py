@@ -31,7 +31,7 @@ CONSTRAINTS
 -----------
 - Python 3.10+ only.
 - Use socket — do NOT wrap nmap or any external scanner.
-- NO use of input() — all input via argparse.
+- NO use of the input built-in — all input via argparse.
 - Timeout must be configurable via --timeout argument.
 
 OUTPUT CONTRACT (auto-grader depends on this)

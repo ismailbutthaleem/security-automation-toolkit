@@ -6,3 +6,4 @@
 paramiko
 requests
 beautifulsoup4
+pyftpdlib
