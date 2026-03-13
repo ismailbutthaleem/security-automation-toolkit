@@ -73,7 +73,12 @@ def parse_arguments():
     # TODO: Implement argparse
     # Required: input_file (positional)
     # Optional: --output (default: suspects.csv)
-    pass
+
+    parser = argparse.ArgumentParser(description="parse linux auth logs")
+    parser.add_argument("input_file", help="path to the desired file")
+    parser.add_argument("--output", default="suspects.csv", help="output Csv file")
+    args = parser.parse_args()
+    return args
 
 
 def parse_log(file_path: Path) -> list[dict]:
