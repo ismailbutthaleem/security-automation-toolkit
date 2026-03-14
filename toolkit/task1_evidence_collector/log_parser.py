@@ -60,12 +60,13 @@ as you build this tool. Benji documents everything.
 # Your imports go here
 import argparse
 import csv
+from ipaddress import ip_address
 import re
 import sys
 from pathlib import Path
 
 
-def parse_arguments():
+def parse_arguments()
     """
     Define and parse command-line arguments.
     Returns the parsed namespace object.
@@ -98,7 +99,34 @@ def parse_log(file_path: Path) -> list[dict]:
     """
     # TODO: Implement log parsing logic
     # Hint: compile your regex patterns before the loop for efficiency
-    pass
+    # Check that the specified path for the file exists, if not fail gracefully.
+    if not file_path.exists():
+         raise FileNotFoundError(f"No log file found at: {file_path}")
+    # Create and empty list for results to be stored in
+    records = []
+    # Compile regex patterns that will be used
+    password = re.compile("Failed password",)
+    user = re.compile("Invalid user",)
+    # Open the file, read it, close it and store the results in the specified file
+    with open(file_path, "r", encoding="utf-8") as log_file:
+        # Read the first line to check if its empty, if it is empty fail gracefully.
+        first_line = log_file.readline()
+        if not first_line:
+            raise ValueError(f"log file is empty at:"{file_path})
+        # If the file is not empty check the first line to look for the specified patterns
+        if password.search(first_line) or user.search(first_line):
+             # Loop throught each line in the loog file in search of the specified patterns.
+             Timestamp = " ".join(first_line.strip()[0:3])
+             IP_Address = re.search(r"\d+\.\d+\.\d+\.\d+", first_line)
+        if password.search(first_line):
+             User_Account = re.search(r"for (\w+) from", first_line)
+        if user.search(first_line):
+            User_Account = re.search(r"user (\w+) from", first_line)
+        IP_Address = ip_match.group()
+        User_Account = user_match.group(1)
+        for line in log_file:
+                password.search(line)
+                user.search(line)
 
 
 def write_csv(records: list[dict], output_path: Path) -> None:
