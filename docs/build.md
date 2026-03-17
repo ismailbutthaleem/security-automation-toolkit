@@ -116,6 +116,13 @@ Encountered multiple issues during development:
 
 Also faced issues with missing IP extraction in some cases, which was fixed by ensuring regex search and match checks were correctly implemented.
 
+When testing log_parser.py againts the metasploitable auth_live.log only one match was found, to verify this was the only match present the command line tool grep was used manually inside the log file
+to verify if this outcome was correct, grep showcased three results so an investigation inside the parser code was started, after analyzing the grep outcome and the parser code it was identified that the
+problem was inside the deduplication key. This only contained:
+dedup_key = (IP_Address, User_Account)
+which resulted in matches that had the combination of same username and IP address to only appear once in the output file, this was fixed by adding the value Timestamp inside the deduplication key:
+dedup_key = (Timestamp, IP_Address, User_Account)
+
 ---
 
 **Decisions I made and why:**
