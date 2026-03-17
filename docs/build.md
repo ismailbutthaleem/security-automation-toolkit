@@ -1,7 +1,7 @@
 # The Benji Protocol — Build Log
 
-**Student Name:**
-**Student ID:**
+**Student Name:** Ismail Butt Haleem
+**Student ID:** 2433887
 **GitHub Repository:**
 
 ---
@@ -47,12 +47,98 @@ alongside your code — the build log and the code should tell the same story.
 
 ## Week 1 — Task 1: Evidence Collector
 
-### [DATE] — Session A
+### [13-03-2026] — Session A
 
+**What I built / changed:**
 
+Set up the full working environment for the assignment. Installed Kali Linux as the development machine and Metasploitable as the target machine. Configured networking between both virtual machines to ensure they could communicate properly.
 
-### [DATE] — Session B
+Joined the GitHub Classroom repository and cloned the project locally. Created and configured a GitHub token to allow authentication and pushing changes to the repository.
 
+Although a pre-built Kali machine was suggested, I chose to install and configure my own Kali VM to have more control over the environment and better understanding of the setup.
+
+---
+
+**What broke and how I fixed it:**
+
+Initially had issues with networking between the VMs, which prevented communication. This was resolved by correctly configuring the network adapters (NAT and Host-Only) and verifying connectivity.
+
+Also had some initial confusion with Git authentication, which was resolved by generating and using a GitHub token instead of password authentication.
+
+---
+
+**Decisions I made and why:**
+
+Chose to manually install Kali instead of using a prebuilt version to gain better understanding of the system setup and configuration process.
+
+Set up proper Git authentication early to avoid issues later when pushing work as evidence.
+
+---
+
+**What the tool output when I ran it against Metasploitable:**
+
+No tools developed yet in this session — focus was on environment setup.
+
+---
+
+**Questions or things to revisit:**
+
+Ensure networking remains stable when starting VMs again.
+Revisit VM configuration if any connectivity issues appear during later stages.
+
+---
+
+### [15-03-2026] — Session B
+
+**What I built / changed:**
+
+Developed `log_parser.py` using the provided framework. The script parses Linux authentication logs to detect brute-force login attempts by identifying entries containing **"Failed password"** and **"Invalid user"**.
+
+Implemented regex patterns to extract:
+- Timestamp
+- IP Address
+- User Account
+
+Stored extracted records and ensured they are written to a CSV file (`suspects.csv`) with correct headers.
+
+---
+
+**What broke and how I fixed it:**
+
+Encountered multiple issues during development:
+
+- Syntax errors caused the script to fail execution (e.g. missing `:` in function definitions).
+- CSV writing initially failed due to incorrect file handling syntax.
+- The script was flagged for using `input()` — after checking, I realised this came from comments or incorrect structure and removed it to comply with argparse requirements.
+- Username extraction failed for different log formats, so regex patterns were adjusted to correctly handle both:
+  - "Failed password for \<user\> from"
+  - "Invalid user \<user\> from"
+
+Also faced issues with missing IP extraction in some cases, which was fixed by ensuring regex search and match checks were correctly implemented.
+
+---
+
+**Decisions I made and why:**
+
+Used a **set** to store extracted records temporarily in order to remove duplicate entries efficiently before converting them into dictionaries.
+
+Compiled regex patterns outside of loops to improve efficiency and avoid repeated processing.
+
+Kept the parsing logic simple and readable to make debugging easier.
+
+---
+
+**What the tool output when I ran it against Metasploitable:**
+
+Not yet tested against Metasploitable logs.
+Successfully tested using provided fixtures — script runs without errors and generates CSV output.
+
+---
+
+**Questions or things to revisit:**
+
+Need to test the parser against the full log datasets provided in the assignment.
+Ensure deduplication works correctly across larger datasets.
 
 
 ---
