@@ -141,7 +141,7 @@ def parse_log(file_path: Path) -> list[dict]:
                 IP_Address = ip_match.group()
                 User_Account = user_match.group(1)
 
-                dedup_key = (IP_Address, User_Account)
+                dedup_key = (Timestamp, IP_Address, User_Account)
 
                 if dedup_key not in unique_records:
                     unique_records.add(dedup_key)
@@ -174,7 +174,7 @@ def parse_log(file_path: Path) -> list[dict]:
                     IP_Address = ip_match.group()
                     User_Account = user_match.group(1)
 
-                    dedup_key = (IP_Address, User_Account)
+                    dedup_key = (Timestamp, IP_Address, User_Account)
 
                     if dedup_key not in unique_records:
                         unique_records.add(dedup_key)
