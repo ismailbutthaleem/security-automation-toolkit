@@ -1,0 +1,7 @@
+2026-03-14T10:11:04Z sshd[123]: Invalid user admin from 192.168.1.10
+2026-03-14T10:11:05Z sshd[123]: Failed password for invalid user admin from 192.168.1.10 port 2222 ssh2
+Mar 14 10:11:06 host sshd[124]: Failed password for root from 10.0.0.5 port 22 ssh2
+Malformed broken line
+2026-03-14T10:11:07Z sshd[125]: Failed password for test
+Mar 14 10:11:08 host sshd[126]: Invalid user guest
+Mar 14 10:11:09 host sshd[127]: Failed password for invalid user admin from 192.168.1.10 port 2222 ssh2

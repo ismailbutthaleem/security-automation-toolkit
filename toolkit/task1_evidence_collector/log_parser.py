@@ -113,9 +113,11 @@ def parse_log(file_path: Path) -> list[dict]:
     password = re.compile(r"Failed password")
     user = re.compile(r"Invalid user")
     ip_pattern = re.compile(r"\d+\.\d+\.\d+\.\d+")
+    syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
+    iso_timestamp_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
     # Open the file, read it, close it and store the results in the specified file
-    with open(file_path, "r", encoding="utf-8") as log_file:
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as log_file:
 
         # Read the first line to check if its empty, if it is empty fail gracefully.
         first_line = log_file.readline()
@@ -125,7 +127,9 @@ def parse_log(file_path: Path) -> list[dict]:
         # If the file is not empty check the first line to look for the specified patterns
         if password.search(first_line) or user.search(first_line):
 
-            Timestamp = " ".join(first_line.split()[0:3])
+            timestamp_match = syslog_timestamp_pattern.search(first_line)
+            if not timestamp_match:
+                timestamp_match = iso_timestamp_pattern.search(first_line)
             ip_match = ip_pattern.search(first_line)
 
             user_match = None
@@ -136,8 +140,9 @@ def parse_log(file_path: Path) -> list[dict]:
             if user.search(first_line):
                 user_match = re.search(r"user (\S+) from", first_line)
 
-            if ip_match and user_match:
+            if ip_match and user_match and timestamp_match:
 
+                Timestamp = timestamp_match.group()
                 IP_Address = ip_match.group()
                 User_Account = user_match.group(1)
 
@@ -158,7 +163,13 @@ def parse_log(file_path: Path) -> list[dict]:
 
             if password.search(line) or user.search(line):
 
-                Timestamp = " ".join(line.split()[0:3])
+                timestamp_match = syslog_timestamp_pattern.search(line)
+                if not timestamp_match:
+                    timestamp_match = iso_timestamp_pattern.search(line)
+                if not timestamp_match:
+                    continue
+
+                Timestamp = timestamp_match.group()
                 ip_match = ip_pattern.search(line)
 
                 user_match = None

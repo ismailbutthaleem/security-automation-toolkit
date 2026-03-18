@@ -232,6 +232,66 @@ Need to test the parser against a fixture containing malformed or truncated line
 
 
 ---
+[18-03-2026]
+
+**What I built / changed:**
+
+Tested log_parser.py against a locally created adversarial log file:
+field_tests/fixtures/local_variant_auth.log
+ to simulate the missing Session B fixture. The file included ISO 8601 timestamps, standard syslog timestamps, malformed lines, and truncated entries to check how the parser behaves under different formats.
+
+**What broke and how I fixed it:**
+
+During testing, the parser successfully detected the correct lines, but the timestamp extraction was incorrect for ISO formatted entries.
+
+For lines such as:
+
+2026-03-14T10:11:04Z sshd[123]: Invalid user admin from 192.168.1.10
+
+the parser output included extra parts of the line in the timestamp, for example:
+
+2026-03-14T10:11:04Z sshd[123]: Invalid
+
+This was caused by the logic:
+
+Timestamp = " ".join(line.split()[0:3])
+
+which assumes all timestamps follow the syslog format (Mar 14 10:11:06). This assumption does not hold for ISO timestamps, where the timestamp is only the first element of the line.
+
+To fix this, the timestamp extraction was updated to use regex patterns for both formats:
+
+syslog timestamps (Mar 14 10:11:06)
+
+ISO 8601 timestamps (2026-03-14T10:11:04Z)
+
+The parser now matches the correct timestamp format and extracts only the relevant portion of the line. Additionally, lines that do not contain a valid timestamp are safely skipped instead of causing incorrect output.
+
+**Decisions I made and why:**
+
+Used regex-based timestamp extraction instead of relying on string splitting, as it allows the parser to handle multiple log formats more reliably.
+
+Did not attempt to force parsing of malformed or truncated lines, as the requirement is to produce structured and valid CSV output. Lines that do not contain all required fields (timestamp, IP, username) are ignored.
+
+Created a local variant log file because the provided variant_auth.log fixture was not present in the repository, allowing similar edge cases to be tested without assuming unseen data.
+
+What the tool output when I ran it:
+
+After applying the fix, which was changing the timestamp regex by adding one for sys log types and another one for ISO log types:
+syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
+iso_timestamp_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+
+ the parser correctly extracted timestamps for both formats and produced clean CSV output such as:
+
+2026-03-14T10:11:04Z,192.168.1.10,admin
+2026-03-14T10:11:05Z,192.168.1.10,admin
+Mar 14 10:11:06,10.0.0.5,root
+Mar 14 10:11:09,192.168.1.10,admin
+
+Malformed and truncated lines were ignored as expected, and the script completed execution without errors.
+
+**Questions or things to revisit:**
+
+For next time do not assume log patterns but research what patters look like so the parser captures all output.
 
 ## Week 2 — Task 2: Network Cartographer
 
