@@ -83,7 +83,19 @@ def parse_arguments():
     """
     # TODO: Implement argparse
     # --ports should accept both ranges (1-1024) and lists (21,22,80)
-    pass
+
+    parser = argparse.ArgumentParser(description="parse ports")
+    parser.add_argument("target", help="scan a tcp port")
+    parser.add_argument(
+        "--output", default="recon_results.json", help="output JSON file"
+    )
+    parser.add_argument("--ports", default="1-1024", help="select a port range")
+    parser.add_argument(
+        "--timeout", default="0.5", type="float", help="timeout duration in seconds"
+    )
+    parser.add_argument("--threads", default="50", type="int", help="number of threads")
+    args = parser.parse_args()
+    return args
 
 
 def parse_port_input(port_string: str) -> list[int]:
@@ -104,7 +116,43 @@ def parse_port_input(port_string: str) -> list[int]:
         ValueError: If the format is unrecognised or ports are out of range.
     """
     # TODO: Implement port range/list parsing
-    pass
+
+    """
+    Convert a port specification string into a sorted list of unique integers.
+    """
+    ports = []
+
+    for part in port_str.split(","):
+        part = part.strip()
+
+        if "-" in part:
+            try:
+                start_str, end_str = part.split("-", 1)
+                start = int(start_str.strip())
+                end = int(end_str.strip())
+            except ValueError:
+                raise ValueError(f"Invalid port range: {part}")
+
+            if start > end:
+                raise ValueError(f"Invalid range (start > end): {part}")
+
+            if start < 1 or end > 65535:
+                raise ValueError(f"Port out of valid range: {part}")
+
+            ports.extend(range(start, end + 1))
+
+        else:
+            try:
+                port = int(part)
+            except ValueError:
+                raise ValueError(f"Invalid port value: {part}")
+
+            if port < 1 or port > 1024:
+                raise ValueError(f"Port out of valid range: {port}")
+
+            ports.append(port)
+
+    return sorted(set(ports))
 
 
 def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
