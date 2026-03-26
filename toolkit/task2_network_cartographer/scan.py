@@ -68,7 +68,7 @@ import argparse
 import json
 import socket
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -91,9 +91,9 @@ def parse_arguments():
     )
     parser.add_argument("--ports", default="1-1024", help="select a port range")
     parser.add_argument(
-        "--timeout", default="0.5", type="float", help="timeout duration in seconds"
+        "--timeout", default=0.5, type=float, help="timeout duration in seconds"
     )
-    parser.add_argument("--threads", default="50", type="int", help="number of threads")
+    parser.add_argument("--threads", default=50, type=int, help="number of threads")
     args = parser.parse_args()
     return args
 
@@ -122,7 +122,7 @@ def parse_port_input(port_string: str) -> list[int]:
     """
     ports = []
 
-    for part in port_str.split(","):
+    for part in port_string.split(","):
         part = part.strip()
 
         if "-" in part:
@@ -147,7 +147,7 @@ def parse_port_input(port_string: str) -> list[int]:
             except ValueError:
                 raise ValueError(f"Invalid port value: {part}")
 
-            if port < 1 or port > 1024:
+            if port < 1 or port > 65535:
                 raise ValueError(f"Port out of valid range: {port}")
 
             ports.append(port)
@@ -168,7 +168,15 @@ def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
     """
     # TODO: Implement banner grabbing
     # Handle: timeout, decode errors, empty response
-    pass
+    try:
+        sock.settimeout(timeout)
+        banner_data = sock.recv(1024)
+        return banner_data.decode(
+            "utf-8",
+            errors="ignore",
+        ).strip()
+    except (socket.timeout, OSError):
+        return ""
 
 
 def check_port(target: str, port: int, timeout: float) -> dict | None:
@@ -186,14 +194,62 @@ def check_port(target: str, port: int, timeout: float) -> dict | None:
     # TODO: Implement TCP connect attempt
     # On success: call grab_banner(), return result dict
     # On failure: return None (do not raise)
-    pass
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        sock.settimeout(timeout)
+        result = sock.connect_ex((target, port))
+
+        if result == 0:
+            banner = grab_banner(sock, timeout)
+            return {"port": port, "banner": banner}
+
+        return None
+
+    except (socket.timeout, OSError):
+        return None
+
+    finally:
+        sock.close()
 
 
 def main():
     args = parse_arguments()
     # TODO: Wire parse_arguments → parse_port_input → ThreadPoolExecutor
     #       → collect results → write JSON output
-    pass
+
+    try:
+        ports = parse_port_input(args.ports)
+    except ValueError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        sys.exit(1)
+
+    open_ports = []
+
+    with ThreadPoolExecutor(max_workers=args.threads) as executor:
+        futures = {
+            executor.submit(check_port, args.target, port, args.timeout): port
+            for port in ports
+        }
+
+        for future in futures:
+            result = future.result()
+            if result is not None:
+                open_ports.append(result)
+
+    open_ports.sort(key=lambda item: item["port"])
+
+    output = {
+        "target": args.target,
+        "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "open_ports": open_ports,
+    }
+
+    json_output = json.dumps(output, indent=2)
+
+    print(json_output)
+    Path(args.output).write_text(json_output)
 
 
 if __name__ == "__main__":
