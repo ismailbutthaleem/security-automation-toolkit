@@ -1,7 +1,12 @@
 # The Benji Protocol — Build Log
 
+<<<<<<< HEAD
 **Student Name:** Ismail Butt Haleem
 **Student ID:** 2433887
+=======
+**Student Name:**
+**Student ID:**
+>>>>>>> template/main
 **GitHub Repository:**
 
 ---
@@ -47,6 +52,7 @@ alongside your code — the build log and the code should tell the same story.
 
 ## Week 1 — Task 1: Evidence Collector
 
+<<<<<<< HEAD
 ### [13-03-2026] — Session A
 
 **What I built / changed:**
@@ -292,6 +298,17 @@ Malformed and truncated lines were ignored as expected, and the script completed
 **Questions or things to revisit:**
 
 For next time do not assume log patterns but research what patters look like so the parser captures all output.
+=======
+### [DATE] — Session A
+
+
+
+### [DATE] — Session B
+
+
+
+---
+>>>>>>> template/main
 
 ## Week 2 — Task 2: Network Cartographer
 

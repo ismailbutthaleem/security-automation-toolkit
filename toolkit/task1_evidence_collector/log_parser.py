@@ -17,7 +17,11 @@ machine-readable — sloppy evidence gets people killed in the field.
 
 WHAT THIS SCRIPT MUST DO
 -------------------------
+<<<<<<< HEAD
 1. Accept a log file path as a command-line argument (argparse — NO prompts).
+=======
+1. Accept a log file path as a command-line argument (argparse — no input built-in).
+>>>>>>> template/main
 2. Use regular expressions (re) to identify lines containing:
    - "Failed password"
    - "Invalid user"
@@ -36,14 +40,22 @@ CONSTRAINTS
 -----------
 - Python 3.10+ only.
 - Standard library only (re, csv, argparse, pathlib).
+<<<<<<< HEAD
 - All input via argparse.
+=======
+- NO use of the input built-in — all input via argparse.
+>>>>>>> template/main
 - NO use of os.system() or subprocess.
 
 OUTPUT CONTRACT (auto-grader depends on this)
 ---------------------------------------------
 CSV file with headers: Timestamp, IP_Address, User_Account
 Rows are comma-separated, one per matching log event.
+<<<<<<< HEAD
 Duplicate entries must be de-duplicated.
+=======
+Duplicate entries must be de-duplicated (same timestamp + IP + user = one row).
+>>>>>>> template/main
 
 EXAMPLE USAGE
 -------------
@@ -59,9 +71,15 @@ as you build this tool. Benji documents everything.
 
 # Your imports go here
 import argparse
+<<<<<<< HEAD
 import re
 import sys
 from ipaddress import ip_address
+=======
+import csv
+import re
+import sys
+>>>>>>> template/main
 from pathlib import Path
 
 
@@ -73,12 +91,16 @@ def parse_arguments():
     # TODO: Implement argparse
     # Required: input_file (positional)
     # Optional: --output (default: suspects.csv)
+<<<<<<< HEAD
 
     parser = argparse.ArgumentParser(description="parse linux auth logs")
     parser.add_argument("input_file", help="path to the desired file")
     parser.add_argument("--output", default="suspects.csv", help="output Csv file")
     args = parser.parse_args()
     return args
+=======
+    pass
+>>>>>>> template/main
 
 
 def parse_log(file_path: Path) -> list[dict]:
@@ -98,6 +120,7 @@ def parse_log(file_path: Path) -> list[dict]:
     """
     # TODO: Implement log parsing logic
     # Hint: compile your regex patterns before the loop for efficiency
+<<<<<<< HEAD
 
     file_path = Path(file_path)
 
@@ -198,6 +221,9 @@ def parse_log(file_path: Path) -> list[dict]:
                         )
 
     return records
+=======
+    pass
+>>>>>>> template/main
 
 
 def write_csv(records: list[dict], output_path: Path) -> None:
@@ -210,6 +236,7 @@ def write_csv(records: list[dict], output_path: Path) -> None:
     """
     # TODO: Implement CSV writing
     # Headers must be exactly: Timestamp, IP_Address, User_Account
+<<<<<<< HEAD
 
     with open(output_path, "w", encoding="utf-8", newline="") as file:
         file.write("Timestamp,IP_Address,User_Account\n")
@@ -217,18 +244,25 @@ def write_csv(records: list[dict], output_path: Path) -> None:
             file.write(
                 f"{record['Timestamp']},{record['IP_Address']},{record['User_Account']}\n"
             )
+=======
+    pass
+>>>>>>> template/main
 
 
 def main():
     args = parse_arguments()
     # TODO: Wire parse_arguments → parse_log → write_csv
     # Handle exceptions and print informative messages to stderr
+<<<<<<< HEAD
     try:
         records = parse_log(args.input_file)
         write_csv(records, args.output)
     except Exception as error:
         print(f"Error: {error}", file=sys.stderr)
         sys.exit(1)
+=======
+    pass
+>>>>>>> template/main
 
 
 if __name__ == "__main__":

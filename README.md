@@ -1,8 +1,15 @@
+<<<<<<< HEAD
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/vfiKjDfo)
 # The Benji Protocol
 
 **COM5413 — Programming for Cyber Security**
 **University of Bolton | HE5**
+=======
+# The Benji Protocol
+
+**COM5413 — Programming for Cyber Security**
+**University of Greater Manchester | HE5**
+>>>>>>> template/main
 
 ---
 
@@ -42,6 +49,7 @@ Brief one-line description of each tool as you complete it:
 
 ```bash
 # Task 1
+<<<<<<< HEAD
 python toolkit/task1_evidence_collector/log_parser.py <log_file>
 
 # Task 2
@@ -52,6 +60,18 @@ python toolkit/task3_access_validator/brute.py <target_ip> --service ftp --user 
 
 # Task 4
 python toolkit/task4_web_enumerator/web_enum.py <url>
+=======
+python3 toolkit/task1_evidence_collector/log_parser.py <log_file>
+
+# Task 2
+python3 toolkit/task2_network_cartographer/scan.py <target_ip> --ports 1-1024
+
+# Task 3
+python3 toolkit/task3_access_validator/brute.py <target_ip> --service ftp --user <user> --wordlist <file>
+
+# Task 4
+python3 toolkit/task4_web_enumerator/web_enum.py <url>
+>>>>>>> template/main
 ```
 
 ---
@@ -59,7 +79,11 @@ python toolkit/task4_web_enumerator/web_enum.py <url>
 ## Running the Field Tests
 
 ```bash
+<<<<<<< HEAD
 pip install pytest
+=======
+pip3 install pytest
+>>>>>>> template/main
 pytest field_tests/ -v
 ```
 
