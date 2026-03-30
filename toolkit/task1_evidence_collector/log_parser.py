@@ -17,11 +17,7 @@ machine-readable — sloppy evidence gets people killed in the field.
 
 WHAT THIS SCRIPT MUST DO
 -------------------------
-<<<<<<< HEAD
-1. Accept a log file path as a command-line argument (argparse — NO prompts).
-=======
 1. Accept a log file path as a command-line argument (argparse — no input built-in).
->>>>>>> template/main
 2. Use regular expressions (re) to identify lines containing:
    - "Failed password"
    - "Invalid user"
@@ -40,22 +36,14 @@ CONSTRAINTS
 -----------
 - Python 3.10+ only.
 - Standard library only (re, csv, argparse, pathlib).
-<<<<<<< HEAD
-- All input via argparse.
-=======
 - NO use of the input built-in — all input via argparse.
->>>>>>> template/main
 - NO use of os.system() or subprocess.
 
 OUTPUT CONTRACT (auto-grader depends on this)
 ---------------------------------------------
 CSV file with headers: Timestamp, IP_Address, User_Account
 Rows are comma-separated, one per matching log event.
-<<<<<<< HEAD
-Duplicate entries must be de-duplicated.
-=======
 Duplicate entries must be de-duplicated (same timestamp + IP + user = one row).
->>>>>>> template/main
 
 EXAMPLE USAGE
 -------------
@@ -69,17 +57,9 @@ as you build this tool. Benji documents everything.
 ================================================================================
 """
 
-# Your imports go here
 import argparse
-<<<<<<< HEAD
 import re
 import sys
-from ipaddress import ip_address
-=======
-import csv
-import re
-import sys
->>>>>>> template/main
 from pathlib import Path
 
 
@@ -88,19 +68,10 @@ def parse_arguments():
     Define and parse command-line arguments.
     Returns the parsed namespace object.
     """
-    # TODO: Implement argparse
-    # Required: input_file (positional)
-    # Optional: --output (default: suspects.csv)
-<<<<<<< HEAD
-
-    parser = argparse.ArgumentParser(description="parse linux auth logs")
-    parser.add_argument("input_file", help="path to the desired file")
-    parser.add_argument("--output", default="suspects.csv", help="output Csv file")
-    args = parser.parse_args()
-    return args
-=======
-    pass
->>>>>>> template/main
+    parser = argparse.ArgumentParser(description="Parse Linux auth logs")
+    parser.add_argument("input_file", help="Path to the log file")
+    parser.add_argument("--output", default="suspects.csv", help="Output CSV file")
+    return parser.parse_args()
 
 
 def parse_log(file_path: Path) -> list[dict]:
@@ -118,112 +89,69 @@ def parse_log(file_path: Path) -> list[dict]:
         FileNotFoundError: If the log file does not exist.
         ValueError: If the file is empty.
     """
-    # TODO: Implement log parsing logic
-    # Hint: compile your regex patterns before the loop for efficiency
-<<<<<<< HEAD
-
     file_path = Path(file_path)
 
-    # Check that the specified path for the file exists, if not fail gracefully.
     if not file_path.exists():
         raise FileNotFoundError(f"No log file found at: {file_path}")
 
-    # Create an empty set for unique results to be stored in
     unique_records = set()
     records = []
 
-    # Compile regex patterns that will be used
-    password = re.compile(r"Failed password")
-    user = re.compile(r"Invalid user")
+    password_pattern = re.compile(r"Failed password")
+    invalid_user_pattern = re.compile(r"Invalid user")
     ip_pattern = re.compile(r"\d+\.\d+\.\d+\.\d+")
     syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
     iso_timestamp_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
-    # Open the file, read it, close it and store the results in the specified file
     with open(file_path, "r", encoding="utf-8", errors="ignore") as log_file:
-
-        # Read the first line to check if its empty, if it is empty fail gracefully.
         first_line = log_file.readline()
         if not first_line:
             raise ValueError(f"log file is empty at: {file_path}")
 
-        # If the file is not empty check the first line to look for the specified patterns
-        if password.search(first_line) or user.search(first_line):
+        def process_line(line: str):
+            if not (password_pattern.search(line) or invalid_user_pattern.search(line)):
+                return
 
-            timestamp_match = syslog_timestamp_pattern.search(first_line)
+            timestamp_match = syslog_timestamp_pattern.search(line)
             if not timestamp_match:
-                timestamp_match = iso_timestamp_pattern.search(first_line)
-            ip_match = ip_pattern.search(first_line)
+                timestamp_match = iso_timestamp_pattern.search(line)
+            if not timestamp_match:
+                return
+
+            ip_match = ip_pattern.search(line)
+            if not ip_match:
+                return
 
             user_match = None
+            if password_pattern.search(line):
+                user_match = re.search(r"for (?:invalid user )?(\S+) from", line)
+            elif invalid_user_pattern.search(line):
+                user_match = re.search(r"Invalid user (\S+) from", line)
 
-            if password.search(first_line):
-                user_match = re.search(r"for (?:invalid user )?(\S+) from", first_line)
+            if not user_match:
+                return
 
-            if user.search(first_line):
-                user_match = re.search(r"user (\S+) from", first_line)
+            timestamp = timestamp_match.group()
+            ip_address = ip_match.group()
+            user_account = user_match.group(1)
 
-            if ip_match and user_match and timestamp_match:
+            dedup_key = (timestamp, ip_address, user_account)
+            if dedup_key not in unique_records:
+                unique_records.add(dedup_key)
+                records.append(
+                    {
+                        "Timestamp": timestamp,
+                        "IP_Address": ip_address,
+                        "User_Account": user_account,
+                    }
+                )
 
-                Timestamp = timestamp_match.group()
-                IP_Address = ip_match.group()
-                User_Account = user_match.group(1)
+        process_line(first_line)
 
-                dedup_key = (Timestamp, IP_Address, User_Account)
-
-                if dedup_key not in unique_records:
-                    unique_records.add(dedup_key)
-                    records.append(
-                        {
-                            "Timestamp": Timestamp,
-                            "IP_Address": IP_Address,
-                            "User_Account": User_Account,
-                        }
-                    )
-
-        # Loop through each line in the log file in search of the specified patterns.
         for line in log_file:
-
-            if password.search(line) or user.search(line):
-
-                timestamp_match = syslog_timestamp_pattern.search(line)
-                if not timestamp_match:
-                    timestamp_match = iso_timestamp_pattern.search(line)
-                if not timestamp_match:
-                    continue
-
-                Timestamp = timestamp_match.group()
-                ip_match = ip_pattern.search(line)
-
-                user_match = None
-
-                if password.search(line):
-                    user_match = re.search(r"for (?:invalid user )?(\S+) from", line)
-
-                if user.search(line):
-                    user_match = re.search(r"user (\S+) from", line)
-
-                if ip_match and user_match:
-
-                    IP_Address = ip_match.group()
-                    User_Account = user_match.group(1)
-
-                    dedup_key = (Timestamp, IP_Address, User_Account)
-
-                    if dedup_key not in unique_records:
-                        unique_records.add(dedup_key)
-                        records.append(
-                            {
-                                "Timestamp": Timestamp,
-                                "IP_Address": IP_Address,
-                                "User_Account": User_Account,
-                            }
-                        )
+            process_line(line)
 
     return records
-=======
-    pass
->>>>>>> template/main
 
 
 def write_csv(records: list[dict], output_path: Path) -> None:
@@ -234,35 +162,22 @@ def write_csv(records: list[dict], output_path: Path) -> None:
         records:     List of IoC record dicts.
         output_path: Path object for the output CSV file.
     """
-    # TODO: Implement CSV writing
-    # Headers must be exactly: Timestamp, IP_Address, User_Account
-<<<<<<< HEAD
-
     with open(output_path, "w", encoding="utf-8", newline="") as file:
         file.write("Timestamp,IP_Address,User_Account\n")
         for record in records:
             file.write(
                 f"{record['Timestamp']},{record['IP_Address']},{record['User_Account']}\n"
             )
-=======
-    pass
->>>>>>> template/main
 
 
 def main():
     args = parse_arguments()
-    # TODO: Wire parse_arguments → parse_log → write_csv
-    # Handle exceptions and print informative messages to stderr
-<<<<<<< HEAD
     try:
         records = parse_log(args.input_file)
         write_csv(records, args.output)
     except Exception as error:
         print(f"Error: {error}", file=sys.stderr)
         sys.exit(1)
-=======
-    pass
->>>>>>> template/main
 
 
 if __name__ == "__main__":
