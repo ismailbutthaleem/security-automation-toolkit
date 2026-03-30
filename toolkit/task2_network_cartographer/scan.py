@@ -31,7 +31,6 @@ CONSTRAINTS
 -----------
 - Python 3.10+ only.
 - Use socket — do NOT wrap nmap or any external scanner.
-<<<<<<< HEAD
 - NO use of input() — all input via argparse.
 =======
 - NO use of the input built-in — all input via argparse.
@@ -72,11 +71,7 @@ import argparse
 import json
 import socket
 import sys
-<<<<<<< HEAD
-from concurrent.futures import ThreadPoolExecutor
-=======
 from concurrent.futures import ThreadPoolExecutor, as_completed
->>>>>>> template/main
 from datetime import datetime
 from pathlib import Path
 
@@ -91,7 +86,6 @@ def parse_arguments():
     """
     # TODO: Implement argparse
     # --ports should accept both ranges (1-1024) and lists (21,22,80)
-<<<<<<< HEAD
 
     parser = argparse.ArgumentParser(description="parse ports")
     parser.add_argument("target", help="scan a tcp port")
@@ -105,9 +99,6 @@ def parse_arguments():
     parser.add_argument("--threads", default=50, type=int, help="number of threads")
     args = parser.parse_args()
     return args
-=======
-    pass
->>>>>>> template/main
 
 
 def parse_port_input(port_string: str) -> list[int]:
@@ -128,7 +119,6 @@ def parse_port_input(port_string: str) -> list[int]:
         ValueError: If the format is unrecognised or ports are out of range.
     """
     # TODO: Implement port range/list parsing
-<<<<<<< HEAD
 
     """
     Convert a port specification string into a sorted list of unique integers.
@@ -166,9 +156,6 @@ def parse_port_input(port_string: str) -> list[int]:
             ports.append(port)
 
     return sorted(set(ports))
-=======
-    pass
->>>>>>> template/main
 
 
 def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
@@ -184,7 +171,6 @@ def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
     """
     # TODO: Implement banner grabbing
     # Handle: timeout, decode errors, empty response
-<<<<<<< HEAD
     try:
         sock.settimeout(timeout)
         banner_data = sock.recv(1024)
@@ -194,9 +180,6 @@ def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
         ).strip()
     except (socket.timeout, OSError):
         return ""
-=======
-    pass
->>>>>>> template/main
 
 
 def check_port(target: str, port: int, timeout: float) -> dict | None:
@@ -214,7 +197,6 @@ def check_port(target: str, port: int, timeout: float) -> dict | None:
     # TODO: Implement TCP connect attempt
     # On success: call grab_banner(), return result dict
     # On failure: return None (do not raise)
-<<<<<<< HEAD
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -233,16 +215,12 @@ def check_port(target: str, port: int, timeout: float) -> dict | None:
 
     finally:
         sock.close()
-=======
-    pass
->>>>>>> template/main
 
 
 def main():
     args = parse_arguments()
     # TODO: Wire parse_arguments → parse_port_input → ThreadPoolExecutor
     #       → collect results → write JSON output
-<<<<<<< HEAD
 
     try:
         ports = parse_port_input(args.ports)
@@ -275,9 +253,6 @@ def main():
 
     print(json_output)
     Path(args.output).write_text(json_output)
-=======
-    pass
->>>>>>> template/main
 
 
 if __name__ == "__main__":
