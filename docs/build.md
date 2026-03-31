@@ -1,12 +1,6 @@
 # The Benji Protocol — Build Log
-
-<<<<<<< HEAD
 **Student Name:** Ismail Butt Haleem
 **Student ID:** 2433887
-=======
-**Student Name:**
-**Student ID:**
->>>>>>> template/main
 **GitHub Repository:**
 
 ---
@@ -52,7 +46,6 @@ alongside your code — the build log and the code should tell the same story.
 
 ## Week 1 — Task 1: Evidence Collector
 
-<<<<<<< HEAD
 ### [13-03-2026] — Session A
 
 **What I built / changed:**
@@ -96,7 +89,7 @@ Revisit VM configuration if any connectivity issues appear during later stages.
 
 ### [15-03-2026] — Session B
 
-What I built / changed:
+**What I built / changed:**
 
 Developed log_parser.py using the provided framework. The script parses Linux authentication logs to detect brute-force login attempts by identifying entries containing "Failed password" and "Invalid user".
 
@@ -108,7 +101,7 @@ Implemented regex patterns to extract:
 
 Stored extracted records and ensured they are written to a CSV file (suspects.csv) with correct headers.
 
-What broke and how I fixed it:
+**What broke and how I fixed it:**
 
 Encountered multiple issues during development:
 
@@ -123,7 +116,7 @@ Also faced issues with missing IP extraction in some cases, which was fixed by e
 
 When testing log_parser.py againts the metasploitable auth_live.log only one match was found, to verify this was the only match present the command line tool grep was used manually inside the log file to verify if this outcome was correct, grep showcased three results so an investigation inside the parser code was started, after analyzing the grep outcome and the parser code it was identified that the problem was inside the deduplication key. This only contained: dedup_key = (IP_Address, User_Account) which resulted in matches that had the combination of same username and IP address to only appear once in the output file, this was fixed by adding the value Timestamp inside the deduplication key: dedup_key = (Timestamp, IP_Address, User_Account)
 
-Decisions I made and why:
+**Decisions I made and why:**
 
 Used a set to store extracted records temporarily in order to remove duplicate entries efficiently before converting them into dictionaries.
 
@@ -139,193 +132,152 @@ Questions or things to revisit:
 
 Need to test the parser against the full log datasets provided in the assignment. Ensure deduplication works correctly across larger datasets.
 
-**What I built / changed:**
-
-Developed `log_parser.py` using the provided framework. The script parses Linux authentication logs to detect brute-force login attempts by identifying entries containing **"Failed password"** and **"Invalid user"**.
-
-Implemented regex patterns to extract:
-- Timestamp
-- IP Address
-- User Account
-
-Stored extracted records and ensured they are written to a CSV file (`suspects.csv`) with correct headers.
-
 ---
-
-**What broke and how I fixed it:**
-
-Encountered multiple issues during development:
-
-- Syntax errors caused the script to fail execution (e.g. missing `:` in function definitions).
-- CSV writing initially failed due to incorrect file handling syntax.
-- The script was flagged for using `input()` — after checking, I realised this came from comments or incorrect structure and removed it to comply with argparse requirements.
-- Username extraction failed for different log formats, so regex patterns were adjusted to correctly handle both:
-  - "Failed password for \<user\> from"
-  - "Invalid user \<user\> from"
-
-Also faced issues with missing IP extraction in some cases, which was fixed by ensuring regex search and match checks were correctly implemented.
-
-When testing log_parser.py againts the metasploitable auth_live.log only one match was found, to verify this was the only match present the command line tool grep was used manually inside the log file
-to verify if this outcome was correct, grep showcased three results so an investigation inside the parser code was started, after analyzing the grep outcome and the parser code it was identified that the
-problem was inside the deduplication key. This only contained:
-dedup_key = (IP_Address, User_Account)
-which resulted in matches that had the combination of same username and IP address to only appear once in the output file, this was fixed by adding the value Timestamp inside the deduplication key:
-dedup_key = (Timestamp, IP_Address, User_Account)
-
----
-
-**Decisions I made and why:**
-
-Used a **set** to store extracted records temporarily in order to remove duplicate entries efficiently before converting them into dictionaries.
-
-Compiled regex patterns outside of loops to improve efficiency and avoid repeated processing.
-
-Kept the parsing logic simple and readable to make debugging easier.
-
----
-
-**What the tool output when I ran it against Metasploitable:**
-
-Not yet tested against Metasploitable logs.
-Successfully tested using provided fixtures — script runs without errors and generates CSV output.
-
----
-
-**Questions or things to revisit:**
-
-Need to test the parser against the full log datasets provided in the assignment.
-Ensure deduplication works correctly across larger datasets.
 
 ## [18-03-2026]
 
 **What I built / changed:**
 
-Tested `log_parser.py` against an external `auth.log` dataset placed at `field_tests/fixtures/auth.log` to validate the parser on a larger authentication log than the live Metasploitable sample.
+Tested log_parser.py against an external auth.log dataset placed at field_tests/fixtures/auth.log to validate the parser on a larger authentication log than the live Metasploitable sample.
 
-The parser output was written to `toolkit/task1_evidence_collector/auth_log.csv`.
+The parser output was written to toolkit/task1_evidence_collector/auth_log.csv.
 
 ---
 
 **What broke and how I fixed it:**
 
-While validating the parser output, the first manual count was taken using an incorrect command structure, which caused `wc -l` to count the whole file rather than only the matching `grep` results. After correcting the command, the proper manual count of lines containing `Invalid user` or `Failed password` was obtained.
-
-This made it possible to compare the raw log matches against the parser CSV output correctly.
+While validating the parser output, the first manual count was taken using an incorrect command structure, which caused wc -l to count the whole file rather than only the matching grep results. After correcting the command, the proper manual count of lines containing Invalid user or Failed password was obtained.
 
 ---
 
 **Decisions I made and why:**
 
-Used `grep` as a manual validation method to compare the parser results against the source log. This was done to confirm that the parser was not missing a significant number of suspicious entries and that the regex patterns were working as expected on a larger dataset.
-
-Kept the same parser logic and used the comparison to validate behaviour rather than changing code without evidence of failure.
+Used grep as a manual validation method to compare the parser results against the source log.
 
 ---
 
 **What the tool output when I ran it:**
 
-The external `auth.log` returned 12,250 matching lines for `Invalid user` and `Failed password`.
-
-The parser output file `auth_log.csv` contained 12,003 lines in total, including the header, meaning 12,002 extracted records.
-
-The difference was small relative to the total dataset size and indicated that the parser was functioning correctly. The likely reason for the difference is that `grep` counts all raw matching lines, while the parser only writes structured records and removes duplicates.
+The external auth.log returned 12,250 matching lines. The parser output contained 12,002 extracted records.
 
 ---
 
 **Questions or things to revisit:**
 
-Need to test the parser against a fixture containing malformed or truncated lines and non-syslog timestamp formats once available, as the Session B `variant_auth.log` file was not present in the repository at the time of testing.
-
+Need to test malformed logs later.
 
 ---
-[18-03-2026]
+
+## [18-03-2026]
 
 **What I built / changed:**
 
 Tested log_parser.py against a locally created adversarial log file:
 field_tests/fixtures/local_variant_auth.log
- to simulate the missing Session B fixture. The file included ISO 8601 timestamps, standard syslog timestamps, malformed lines, and truncated entries to check how the parser behaves under different formats.
+
+---
 
 **What broke and how I fixed it:**
 
-During testing, the parser successfully detected the correct lines, but the timestamp extraction was incorrect for ISO formatted entries.
+Timestamp extraction failed for ISO format. Fixed using regex patterns.
 
-For lines such as:
-
-2026-03-14T10:11:04Z sshd[123]: Invalid user admin from 192.168.1.10
-
-the parser output included extra parts of the line in the timestamp, for example:
-
-2026-03-14T10:11:04Z sshd[123]: Invalid
-
-This was caused by the logic:
-
-Timestamp = " ".join(line.split()[0:3])
-
-which assumes all timestamps follow the syslog format (Mar 14 10:11:06). This assumption does not hold for ISO timestamps, where the timestamp is only the first element of the line.
-
-To fix this, the timestamp extraction was updated to use regex patterns for both formats:
-
-syslog timestamps (Mar 14 10:11:06)
-
-ISO 8601 timestamps (2026-03-14T10:11:04Z)
-
-The parser now matches the correct timestamp format and extracts only the relevant portion of the line. Additionally, lines that do not contain a valid timestamp are safely skipped instead of causing incorrect output.
+---
 
 **Decisions I made and why:**
 
-Used regex-based timestamp extraction instead of relying on string splitting, as it allows the parser to handle multiple log formats more reliably.
+Used regex instead of split for flexibility.
 
-Did not attempt to force parsing of malformed or truncated lines, as the requirement is to produce structured and valid CSV output. Lines that do not contain all required fields (timestamp, IP, username) are ignored.
+---
 
-Created a local variant log file because the provided variant_auth.log fixture was not present in the repository, allowing similar edge cases to be tested without assuming unseen data.
+**What the tool output when I ran it:**
 
-What the tool output when I ran it:
+Correct structured output.
 
-After applying the fix, which was changing the timestamp regex by adding one for sys log types and another one for ISO log types:
-syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
-iso_timestamp_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
-
- the parser correctly extracted timestamps for both formats and produced clean CSV output such as:
-
-2026-03-14T10:11:04Z,192.168.1.10,admin
-2026-03-14T10:11:05Z,192.168.1.10,admin
-Mar 14 10:11:06,10.0.0.5,root
-Mar 14 10:11:09,192.168.1.10,admin
-
-Malformed and truncated lines were ignored as expected, and the script completed execution without errors.
+---
 
 **Questions or things to revisit:**
 
-For next time do not assume log patterns but research what patters look like so the parser captures all output.
-=======
-### [DATE] — Session A
-
-
-
-### [DATE] — Session B
-
-
+Research log formats better.
 
 ---
->>>>>>> template/main
 
 ## Week 2 — Task 2: Network Cartographer
 
-### [DATE] — Session A
+[31-03-2026] — Session A
 
-**Metasploitable scan output (paste key results):**
-```json
+Metasploitable scan output (paste key results):
 
-```
+**What I Built / Changed**
 
-**Observations — what services did you find? What do the banners tell you?**
+Developed a TCP threaded port scanner that scans a range of ports or specific ports concurrently. The main purpose of the scanner is to find open ports, grab a service name/version banner if available, and attempt a TCP connection.
 
+The purpose of this tool is to act as the first reconnaissance tool to find vulnerabilities in a system, as a vulnerability is often exposed through open ports or banners being displayed. These banners or open ports can then be exploited by searching for known vulnerabilities. This will be covered in Part B of this documentation.
 
+The workflow of the scanner is as follows:
 
-### [DATE] — Session B
+Read CLI arguments using argparse
+Parse the port input into usable integers
+Create worker threads to concurrently scan ports
+Scan each port individually using TCP connections
+If a port is open, attempt to grab a banner from the service
+Collect raw results from each thread
+Sort results cleanly in a readable structure
+Build the JSON output file
+Print the results to the terminal and save them to the JSON file
+What broke and how I fixed it
 
+No major logical errors were encountered during the development of the port scanner itself. However, when updating the repository with fixes and field_tests from the origin main/template, Git introduced merge conflict markers:
 
+**<<<<<<< HEAD
+=======
+>>>>>>> template/main
+
+These corrupted the scanner as they are not valid Python syntax and caused execution failures.
+
+The fix:
+
+Manually removed all merge conflict markers and ensured only the correct version of the code remained. After this, the script executed correctly again.
+
+**Decisions I made and why:**
+
+Used socket.connect_ex() instead of connect() to safely attempt connections without crashing the script
+Implemented threading using ThreadPoolExecutor to improve performance, as scanning ports sequentially would be too slow
+Included a timeout value to prevent the scanner from hanging on unresponsive ports
+Ensured that every open port always includes a "banner" field, even if empty, to match the required output contract
+Sorted results by port number to improve readability and consistency in output
+What the tool output when I ran it against Metasploitable:
+
+The output located at:
+
+toolkit/task2_network_cartographer/recon_results.json
+
+shows that ports 21, 22, 80, 445, and 631 are open and listening for traffic.
+
+A clear distinction that can be made from looking at the JSON output is that port 21 (FTP) and port 22 (SSH) display banners that provide useful information which can later be searched for known vulnerabilities and therefore exploited.
+
+Example:
+
+"port": 21,
+"banner": "220 ProFTPD 1.3.5 Server (ProFTPD Default Installation) [172.16.19.101]"
+
+This exposes that the server running FTP is ProFTPD and its version is 1.3.5. This information can be very useful when trying to exploit the vulnerability or finding a fix to secure and harden it.
+
+Similar scenario with SSH on port 22:
+
+"port": 22,
+"banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13"
+
+Here the banner displays the SSH version and the operating system the service is running on, in this case Ubuntu.
+
+Ports such as 80, 445, and 631 did not return banners. This is expected behaviour, as some services do not send data immediately upon connection and require protocol-specific interaction before responding.
+
+**Questions or things to revisit:**
+
+Next step is to research and understand how banner information can be used to exploit and secure services, and what can be done with the open ports identified.
+
+It is important to remember that some services have their ports open but do not display banners because they require a request interaction (for example port 80 HTTP). However, this does not mean the open port cannot be exploited. This is something very important to consider and test later on.
+
+### [] — Session B
 
 ---
 
@@ -333,11 +285,7 @@ For next time do not assume log patterns but research what patters look like so 
 
 ### [DATE] — Session A
 
-
-
 ### [DATE] — Session B
-
-
 
 ---
 
@@ -347,46 +295,36 @@ For next time do not assume log patterns but research what patters look like so 
 
 **Metasploitable web recon output:**
 
-
 **HTML comments found:**
-
 
 **Sensitive paths found:**
 
-
+---
 
 ### [DATE] — Session B
-
-
 
 ---
 
 ## Week 5 — Vulnerability Hunt
 
-> This section is your mission log. Update it in real time during the session.
-> Benji does not write the mission log after the mission. He writes it during.
-
 ### Pre-Hunt Checklist
 
 - [ ] All four toolkit tools pass their field tests locally
-- [ ] `requirements.txt` is up to date (`pip freeze > requirements.txt`)
-- [ ] `AI_LOG.md` is current
-- [ ] `vulnerability_hunt/exploit.py` — argument parsing in place
-- [ ] `vulnerability_hunt/fix.py` — argument parsing in place
-- [ ] `vulnerability_hunt/REPORT.md` — headings populated, ready to fill
-- [ ] Git remote confirmed, can push
-- [ ] Tags w1, w2, w3, w4 in place
+- [ ] requirements.txt is up to date
+- [ ] AI_LOG.md is current
+- [ ] exploit.py ready
+- [ ] fix.py ready
+- [ ] REPORT.md ready
+- [ ] Git push works
+- [ ] Tags in place
 
 ### Hunt Log
 
 **[TIME] — Diagnosis phase:**
 
-
 **[TIME] — Vulnerability identified:**
 
-
 **[TIME] — Exploit development:**
-
 
 **[TIME] — Flag retrieved:**
 ```
@@ -395,6 +333,4 @@ FLAG:
 
 **[TIME] — Remediation:**
 
-
 **[TIME] — Final commit and push:**
-
