@@ -271,6 +271,25 @@ Here the banner displays the SSH version and the operating system the service is
 
 Ports such as 80, 445, and 631 did not return banners. This is expected behaviour, as some services do not send data immediately upon connection and require protocol-specific interaction before responding.
 
+Inside the live target machine used to command:
+
+ss -tln
+
+to view actually which tcp ports were actually open, open does not automatically mean working as some ports could be filtered by a firewall therefore they do appear as open on the local machine but will refuse some types of connections such as the one requested by scan.py tool, to test this theory after identifying all open ports (=0) a manual tcp connection was reauested from the kali machine to the target machgine using netcat, command:
+
+nc -vz -w 2 <ip> <port>
+
+example:
+
+port open identified manually that did not appear in the JSON output, port 139 (NetBIOS Session Service)
+
+result:
+172.16.19.101: inverse host lookup failed: Host name lookup failure : Resource temporarily unavailable
+(UNKNOWN) [172.16.19.101] 139 (netbios-ssn) : Connection timed out
+
+here connection timed out usually suggests there is a firewall blocking the tcp connection.
+
+
 **Questions or things to revisit:**
 
 Next step is to research and understand how banner information can be used to exploit and secure services, and what can be done with the open ports identified.
