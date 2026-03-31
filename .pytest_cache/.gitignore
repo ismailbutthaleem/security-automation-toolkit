@@ -1,0 +1,21 @@
+# Created by pytest automatically.
+
+# external logs
+auth.log
+auth_live.log
+field_tests/fixtures/auth.log
+
+# generic logs
+*.log
+
+# python
+__pycache__/
+*.pyc
+
+# virtual env
+venv/
+.env/
+
+# editor
+.vscode/
+
