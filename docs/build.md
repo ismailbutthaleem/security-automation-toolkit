@@ -228,9 +228,6 @@ What broke and how I fixed it
 
 No major logical errors were encountered during the development of the port scanner itself. However, when updating the repository with fixes and field_tests from the origin main/template, Git introduced merge conflict markers:
 
-**<<<<<<< HEAD
-=======
->>>>>>> template/main
 
 These corrupted the scanner as they are not valid Python syntax and caused execution failures.
 
@@ -296,9 +293,42 @@ Next step is to research and understand how banner information can be used to ex
 
 It is important to remember that some services have their ports open but do not display banners because they require a request interaction (for example port 80 HTTP). However, this does not mean the open port cannot be exploited. This is something very important to consider and test later on.
 
-### [] — Session B
+[01-04-2026] — Session B
 
----
+**What I built / changed:**
+
+Based on the initial scanner output (scan.py), Analysed the banner information and immediately searched for relevant CVEs related to the FTP service. After researching and understanding the vulnerability, I developed an automated exploit targeting the service.
+
+Created an exploit script that connects to the FTP service and sends specific commands to copy a sensitive file (/etc/passwd) on the target system to a web-accessible directory. The script then retrieves the file via HTTP and prints the output, proving successful exploitation.
+
+**What broke and how I fixed it:**
+
+The first exploit draft was too basic. It worked at a very simple level but lacked structure and important validation steps, such as verifying the service banner before exploitation and handling output properly.
+
+Fix:
+
+Refactored the exploit into a modular structure using functions. Each function was designed to handle a specific task, such as banner verification, sending FTP commands, and retrieving the file. Also replaced hardcoded values with variables to improve flexibility and automation. Added proper output handling to make results clearer and more usable.
+
+**Decisions I made and why:**
+
+Compared the exploit results with the actual file on the target machine by manually connecting to the FTP service. Used netcat to send the same commands and verified that the copied file matched the retrieved output. This was done to confirm the exploit was working correctly and not producing false results.
+
+Also ensured the file was copied to a web-accessible path (/var/www/html) so it could be reliably retrieved using HTTP, instead of using temporary directories that are not accessible externally.
+
+What the tool output when I ran it against Metasploitable:
+
+The exploit successfully identified the vulnerable service, copied the /etc/passwd file to the target system, and retrieved it via HTTP. The output displayed system user entries such as:
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+...
+
+This confirms that the exploit worked as intended and that sensitive data can be accessed due to the vulnerability.
+
+**Questions or things to revisit:**
+
+Need to further explore how different vulnerabilities expose services and how the extracted information (such as versions and banners) can be used to identify more complex exploits. Also want to look into implementing a proper fix for the vulnerability and understanding how to secure the service against this type of attack.
+
 
 ## Week 3 — Task 3: Access Validator
 
