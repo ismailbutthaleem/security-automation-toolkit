@@ -203,7 +203,7 @@ Research log formats better.
 
 ## Week 2 — Task 2: Network Cartographer
 
-[31-03-2026] — Session A
+## [31-03-2026] — Session A
 
 Metasploitable scan output (paste key results):
 
@@ -293,7 +293,7 @@ Next step is to research and understand how banner information can be used to ex
 
 It is important to remember that some services have their ports open but do not display banners because they require a request interaction (for example port 80 HTTP). However, this does not mean the open port cannot be exploited. This is something very important to consider and test later on.
 
-[01-04-2026] — Session B
+## [01-04-2026] — Session B
 
 **What I built / changed:**
 
@@ -340,6 +340,97 @@ However, even without direct access to password hashes, the extracted usernames 
 Even though passwords are not exposed, can they be brute forced using the identified usernames?
 
 This leads into the next stage of the workflow, which will involve validating access using these usernames — forming the basis of the next tool, the access validator.
+
+### [03-04-2026]
+
+**What I built / changed:**
+
+Built a remediation script for the vulnerability identified using the `gateaway_exploit.py` script.
+
+The initial approach was to disable the vulnerable functionality within the ProFTPD service by modifying its configuration. However, this was later changed to instead disable access to the affected service entirely by blocking FTP on port 21.
+
+The final remediation script is located at:
+
+toolkit/task2_network_cartographer/gateaway_fix.py
+
+
+**What broke and how I fixed it:**
+
+The original remediation approach was unsuccessful. Although the script attempted to disable the vulnerable module (`mod_copy`) through configuration changes, the vulnerability remained exploitable.
+
+After investigation, it was identified that the module responsible for the vulnerability was statically compiled into the ProFTPD binary rather than dynamically loaded via configuration. This meant that commenting out or modifying the configuration file had no effect on the actual functionality of the service.
+
+To resolve this, the remediation strategy was changed. Instead of attempting to disable the module, the script was updated to block access to the FTP service entirely by disabling port 21.
+
+This was implemented by establishing an SSH connection to the target machine and applying an iptables firewall rule to drop incoming traffic on port 21.
+
+
+**Decisions I made and why:**
+
+Chose to implement a network-level mitigation instead of a service-level fix because the vulnerable module could not be reliably disabled through configuration changes due to being compiled into the service.
+
+Blocking port 21 provided a more reliable and immediate solution, as it removes external access to the vulnerable service without depending on configuration edits or service restarts.
+
+Although this does not remove the vulnerability itself, it effectively reduces the attack surface and prevents exploitation from external sources.
+
+
+**What the tool output when I ran it against Metasploitable:**
+
+After a successful remediation, the script outputs:
+
+[4] Verifying FTP is blocked...
+    [+] FTP no longer reachable on port 21.
+
+[+] Remediation complete.
+    Vulnerability exposure reduced: FTP access blocked externally
+    Service state: Port 21 filtered by firewall
+
+To further verify the fix, the port scanner (`scan.py`) was executed again. The output showed that port 21 was no longer listed as open:
+
+{
+  "target": "172.16.19.101",
+  "scan_time": "2026-04-03 22:06:58",
+  "open_ports": [
+    {
+      "port": 22,
+      "banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13"
+    },
+    {
+      "port": 80,
+      "banner": ""
+    },
+    {
+      "port": 445,
+      "banner": ""
+    },
+    {
+      "port": 631,
+      "banner": ""
+    }
+  ]
+}
+
+This confirms that port 21 (FTP) has been successfully disabled.
+
+As an additional manual validation step, netcat was used to test connectivity to port 21:
+
+Command:
+
+nc -vz -w 2 172.16.19.101 21
+
+Expected output:
+
+(UNKNOWN) [172.16.19.101] 21 (ftp) : Connection timed out
+
+This further confirms that the port is no longer reachable and the remediation has been applied successfully.
+
+
+**Questions or things to revisit:**
+
+Consider implementing a permanent fix by upgrading or recompiling the ProFTPD service without the vulnerable module, as the current solution only provides containment rather than full remediation.
+
+Also revisit whether internal access to the FTP service remains possible despite external blocking, and whether additional controls are required.
+
 
 ## Week 3 — Task 3: Access Validator
 
