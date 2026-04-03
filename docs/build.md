@@ -327,8 +327,19 @@ This confirms that the exploit worked as intended and that sensitive data can be
 
 **Questions or things to revisit:**
 
-Need to further explore how different vulnerabilities expose services and how the extracted information (such as versions and banners) can be used to identify more complex exploits. Also want to look into implementing a proper fix for the vulnerability and understanding how to secure the service against this type of attack.
+Need to further explore how different vulnerabilities expose services and how extracted information (such as versions and banners) can be used to identify more complex or chained exploits. Also want to look into implementing a proper fix for the vulnerability and understanding how to secure the service against this type of attack.
 
+The exploit only reveals usernames and system account information, not passwords, as these are stored in a separate file:
+
+/etc/shadow
+
+This file requires elevated (root) permissions to access, meaning privilege escalation would be needed to retrieve it. This is outside the scope of the current vulnerability and exploit, which operates under the permissions of the FTP service.
+
+However, even without direct access to password hashes, the extracted usernames still have value. This raises an important follow-up question:
+
+Even though passwords are not exposed, can they be brute forced using the identified usernames?
+
+This leads into the next stage of the workflow, which will involve validating access using these usernames — forming the basis of the next tool, the access validator.
 
 ## Week 3 — Task 3: Access Validator
 
