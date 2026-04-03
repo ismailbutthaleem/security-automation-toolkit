@@ -1,0 +1,22 @@
+{
+  "target": "172.16.19.101",
+  "scan_time": "2026-04-03 22:06:58",
+  "open_ports": [
+    {
+      "port": 22,
+      "banner": "SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13"
+    },
+    {
+      "port": 80,
+      "banner": ""
+    },
+    {
+      "port": 445,
+      "banner": ""
+    },
+    {
+      "port": 631,
+      "banner": ""
+    }
+  ]
+}
