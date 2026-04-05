@@ -65,8 +65,7 @@ from pathlib import Path
 
 def parse_arguments():
     """
-    Define and parse command-line arguments.
-    Returns the parsed namespace object.
+    Parses command-line arguments.
     """
     parser = argparse.ArgumentParser(description="Parse Linux auth logs")
     parser.add_argument("input_file", help="Path to the log file")
@@ -76,68 +75,102 @@ def parse_arguments():
 
 def parse_log(file_path: Path) -> list[dict]:
     """
-    Read the log file and extract IoC records.
-
-    Args:
-        file_path: Path object pointing to the log file.
-
-    Returns:
-        A list of dicts, each containing:
-        {'Timestamp': str, 'IP_Address': str, 'User_Account': str}
-
-    Raises:
-        FileNotFoundError: If the log file does not exist.
-        ValueError: If the file is empty.
+    Reads log file and extracts IoC records.
     """
     file_path = Path(file_path)
 
+    # Check file exists
     if not file_path.exists():
         raise FileNotFoundError(f"No log file found at: {file_path}")
 
-    unique_records = set()
+    unique_records = set()  # used for deduplication
     records = []
 
+    # Required patterns from assignment brief
     password_pattern = re.compile(r"Failed password")
     invalid_user_pattern = re.compile(r"Invalid user")
+
+    # OPTIONAL extension (real-world logs)
+    pam_pattern = re.compile(r"authentication failure")
+
+    # Extraction patterns
     ip_pattern = re.compile(r"\d+\.\d+\.\d+\.\d+")
+    pam_ip_pattern = re.compile(r"rhost=(\d+\.\d+\.\d+\.\d+)")
+    pam_user_pattern = re.compile(r"user=(\S+)")
+
+    # Timestamp patterns (handles both syslog + ISO format)
     syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
     iso_timestamp_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
     with open(file_path, "r", encoding="utf-8", errors="ignore") as log_file:
         first_line = log_file.readline()
+
+        # Handle empty file case
         if not first_line:
             raise ValueError(f"log file is empty at: {file_path}")
 
         def process_line(line: str):
-            if not (password_pattern.search(line) or invalid_user_pattern.search(line)):
+            """
+            Processes a single log line and extracts IoC data.
+            """
+
+            # Step 1 — Filter relevant lines (based on brief + optional extension)
+            if not (
+                password_pattern.search(line)
+                or invalid_user_pattern.search(line)
+                or pam_pattern.search(line)
+            ):
                 return
 
+            # Step 2 — Extract timestamp
             timestamp_match = syslog_timestamp_pattern.search(line)
             if not timestamp_match:
                 timestamp_match = iso_timestamp_pattern.search(line)
             if not timestamp_match:
                 return
 
-            ip_match = ip_pattern.search(line)
-            if not ip_match:
-                return
-
-            user_match = None
-            if password_pattern.search(line):
-                user_match = re.search(r"for (?:invalid user )?(\S+) from", line)
-            elif invalid_user_pattern.search(line):
-                user_match = re.search(r"Invalid user (\S+) from", line)
-
-            if not user_match:
-                return
-
             timestamp = timestamp_match.group()
-            ip_address = ip_match.group()
-            user_account = user_match.group(1)
 
+            ip_address = None
+            user_account = None
+
+            # Step 3 — Handle PAM-style logs (authentication failure)
+            if pam_pattern.search(line):
+                pam_ip_match = pam_ip_pattern.search(line)
+                pam_user_match = pam_user_pattern.search(line)
+
+                if not pam_ip_match or not pam_user_match:
+                    return
+
+                ip_address = pam_ip_match.group(1)
+                user_account = pam_user_match.group(1)
+
+            # Step 4 — Handle standard auth.log patterns
+            else:
+                ip_match = ip_pattern.search(line)
+                if not ip_match:
+                    return
+
+                user_match = None
+
+                if password_pattern.search(line):
+                    user_match = re.search(r"for (?:invalid user )?(\S+) from", line)
+
+                elif invalid_user_pattern.search(line):
+                    user_match = re.search(r"Invalid user (\S+) from", line)
+
+                if not user_match:
+                    return
+
+                ip_address = ip_match.group()
+                user_account = user_match.group(1)
+
+            # Step 5 — Deduplicate entries
             dedup_key = (timestamp, ip_address, user_account)
+
             if dedup_key not in unique_records:
                 unique_records.add(dedup_key)
+
                 records.append(
                     {
                         "Timestamp": timestamp,
@@ -146,8 +179,10 @@ def parse_log(file_path: Path) -> list[dict]:
                     }
                 )
 
+        # Process first line separately (already read)
         process_line(first_line)
 
+        # Process remaining lines
         for line in log_file:
             process_line(line)
 
@@ -156,14 +191,11 @@ def parse_log(file_path: Path) -> list[dict]:
 
 def write_csv(records: list[dict], output_path: Path) -> None:
     """
-    Write extracted records to a CSV file.
-
-    Args:
-        records:     List of IoC record dicts.
-        output_path: Path object for the output CSV file.
+    Writes extracted records to CSV file.
     """
     with open(output_path, "w", encoding="utf-8", newline="") as file:
         file.write("Timestamp,IP_Address,User_Account\n")
+
         for record in records:
             file.write(
                 f"{record['Timestamp']},{record['IP_Address']},{record['User_Account']}\n"
@@ -172,9 +204,11 @@ def write_csv(records: list[dict], output_path: Path) -> None:
 
 def main():
     args = parse_arguments()
+
     try:
         records = parse_log(args.input_file)
         write_csv(records, args.output)
+
     except Exception as error:
         print(f"Error: {error}", file=sys.stderr)
         sys.exit(1)
