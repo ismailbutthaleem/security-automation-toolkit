@@ -124,7 +124,7 @@ Compiled regex patterns outside of loops to improve efficiency and avoid repeate
 
 Kept the parsing logic simple and readable to make debugging easier.
 
-What the tool output when I ran it against Metasploitable:
+**What the tool output when I ran it against Metasploitable:**
 
 Not yet tested against Metasploitable logs. Successfully tested using provided fixtures — script runs without errors and generates CSV output.
 
@@ -153,6 +153,8 @@ While validating the parser output, the first manual count was taken using an in
 **Decisions I made and why:**
 
 Used grep as a manual validation method to compare the parser results against the source log.
+
+grep -Ec "Invalid User|Failed Password"
 
 ---
 
@@ -200,6 +202,62 @@ Correct structured output.
 Research log formats better.
 
 ---
+
+### [05-04-2026]
+
+**What I built / changed:**
+
+Researched additional authentication log formats, specifically PAM-style logs, and downloaded an external auth.log dataset containing this format. Reviewed the structure of these logs to understand how authentication failures are recorded differently compared to the standard "Failed password" and "Invalid user" entries.
+
+Updated log_parser.py to support PAM-style entries by extending both detection and extraction logic.
+
+Added the following regex patterns:
+
+pam_pattern = re.compile(r"authentication failure")
+pam_ip_pattern = re.compile(r"rhost=(\d+\.\d+\.\d+\.\d+)")
+pam_user_pattern = re.compile(r"user=(\S+)")
+**Decisions I made and why:**
+
+The parser was extended to support additional log formats to test whether the implementation could handle real-world variations without breaking the required functionality.
+
+After implementing the changes, the provided pytest suite (field_tests/test_task1.py) was executed to ensure that all original requirements were still met and that the extension did not introduce regressions.
+
+Following this, manual testing was carried out using external datasets to validate behaviour beyond the assignment scope.
+
+PAM-style logs were included because they are commonly used in real Linux authentication systems, making the parser more realistic and robust.
+
+**What the tool output when I ran it against Metasploitable:**
+
+Manual verification was performed using:
+
+grep -Ec "authentication failure" /home/benji/Downloads/Linux_2k.log
+
+This returned 490 matching lines in the raw log file.
+
+The parser was then executed against the same dataset, producing a CSV report at:
+
+toolkit/task1_evidence_collector/Linux_log.csv
+
+A line count was performed using:
+
+wc -l Linux_log.csv
+
+The output contained 153 lines (including header).
+
+The difference between raw log matches and parser output is expected due to:
+
+Deduplication logic (same timestamp, IP, and user stored once)
+Filtering of incomplete or malformed entries
+
+Analysis:
+
+The high number of repeated authentication failures from the same source strongly indicates brute-force activity targeting the system.
+
+This demonstrates that the parser is correctly transforming raw log noise into structured, meaningful security data.
+
+**Questions or things to revisit:**
+
+This parser is operational and correct for a specific scope but would not work and must be heavily extended if working with other types of logs.
 
 ## Week 2 — Task 2: Network Cartographer
 
@@ -427,7 +485,7 @@ This further confirms that the port is no longer reachable and the remediation h
 
 **Questions or things to revisit:**
 
-Consider implementing a permanent fix by upgrading or recompiling the ProFTPD service without the vulnerable module, as the current solution only provides containment rather than full remediation.
+Consider implementing a permanent fix by upgrading or recompiling the ProFTPD service without the vulnerable module, as the current solution only provides containment rather than full remediation. after a reboot of the target system the remedition status will reset, therefore port 21 will be open again. This is fine for labs but should be avoided in enterprise operations.
 
 Also revisit whether internal access to the FTP service remains possible despite external blocking, and whether additional controls are required.
 

@@ -2,6 +2,7 @@
 auth.log
 auth_live.log
 field_tests/fixtures/auth.log
+Linux_2k.log
 
 # generic logs
 *.log
