@@ -146,18 +146,23 @@ def log_attempt(output_path: Path, user: str, password: str, result: str) -> Non
     """
     write_header = not output_path.exists() or output_path.stat().st_size == 0
 
-    with output_path.open("a", encoding="utf-8", newline="") as file:
-        writer = csv.writer(file)
-        if write_header:
-            writer.writerow(["timestamp", "username", "password", "result"])
-        writer.writerow(
-            [
-                datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                user,
-                password,
-                result,
-            ]
-        )
+    try:
+
+        with output_path.open("a", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            if write_header:
+                writer.writerow(["timestamp", "username", "password", "result"])
+            writer.writerow(
+                [
+                    datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    user,
+                    password,
+                    result,
+                ]
+            )
+    except OSError as error:
+        print(f"[-] could not write to log file, {error}", file=sys.stderr)
+        sys.exit(1)
 
 
 def attempt_ftp(target: str, port: int, user: str, password: str) -> bool:
