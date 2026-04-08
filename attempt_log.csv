@@ -11,3 +11,15 @@ timestamp,username,password,result
 2026-04-08T18:56:17Z,testuser,wrong1,FAIL
 2026-04-08T18:56:20Z,testuser,pässwort,FAIL
 2026-04-08T18:56:20Z,testuser,s3cur3p@ss,SUCCESS
+2026-04-08T21:57:48Z,testuser,wrongpass1,FAIL
+2026-04-08T21:57:51Z,testuser,wrongpass2,FAIL
+2026-04-08T21:57:51Z,testuser,s3cur3p@ss,SUCCESS
+2026-04-08T21:57:54Z,testuser,bad1,FAIL
+2026-04-08T21:57:58Z,testuser,bad2,FAIL
+2026-04-08T21:58:01Z,testuser,bad3,FAIL
+2026-04-08T21:58:04Z,testuser,wrongpass1,FAIL
+2026-04-08T21:58:07Z,testuser,wrongpass2,FAIL
+2026-04-08T21:58:07Z,testuser,s3cur3p@ss,SUCCESS
+2026-04-08T21:58:10Z,testuser,wrong1,FAIL
+2026-04-08T21:58:14Z,testuser,pässwort,FAIL
+2026-04-08T21:58:14Z,testuser,s3cur3p@ss,SUCCESS

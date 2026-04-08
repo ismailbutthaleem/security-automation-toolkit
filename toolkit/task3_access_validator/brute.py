@@ -73,6 +73,17 @@ except ImportError:
     sys.exit(1)
 
 
+def valid_port(value: str):
+    try:
+        """ "Make sure the port range is a valid range 1-65535"""
+        port = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("Port must be a number") from error
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError("port range must be within 1-65535")
+    return port
+
+
 def parse_arguments():
     """
     Define and parse command-line arguments.
@@ -96,7 +107,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--port",
-        type=int,
+        type=valid_port,
         default=None,
         help="Optional port override (default: 21 for FTP, 22 for SSH)",
     )
@@ -206,7 +217,12 @@ def attempt_ssh(target: str, port: int, user: str, password: str) -> bool:
             auth_timeout=5,
         )
         return True
-    except (paramiko.AuthenticationException, paramiko.SSHException, socket.error, OSError):
+    except (
+        paramiko.AuthenticationException,
+        paramiko.SSHException,
+        socket.error,
+        OSError,
+    ):
         return False
     finally:
         client.close()
