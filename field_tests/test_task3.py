@@ -1,24 +1,6 @@
 """
 ================================================================================
 COM5413 — The Benji Protocol
-<<<<<<< HEAD
-IMF Field Test — Task 3
-================================================================================
-
-This test file will be released at the start of Week 3 Session A.
-
-Pull from the template repository before Session A begins:
-    git pull origin main
-
-Do not modify this file. Run with:
-    pytest field_tests/test_task3.py -v
-================================================================================
-"""
-
-def test_placeholder():
-    """This test suite will be released in Week 3. Check back then."""
-    pass
-=======
 IMF Field Test — Task 3: The Access Validator
 ================================================================================
 
@@ -34,7 +16,6 @@ A failing test tells you exactly what the contract violation is — fix it.
 ================================================================================
 """
 
-import os
 import re
 import socket
 import subprocess
@@ -228,7 +209,6 @@ def test_ftp_stops_on_success(ftp_server, fixtures):
         ]
     )
     assert result.returncode == 0, f"Script exited with error:\n{result.stderr}"
-    # If it tried wrongpass3 (the 4th entry), it did not stop on success
     assert (
         "wrongpass3" not in result.stdout and "wrongpass3" not in result.stderr
     ), "Script continued testing after finding valid credentials."
@@ -288,4 +268,3 @@ def test_service_argument_validated():
     assert (
         result.returncode != 0
     ), "Script should reject --service http. Only ssh and ftp are valid."
->>>>>>> template/main

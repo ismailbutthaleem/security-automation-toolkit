@@ -1,0 +1,13 @@
+timestamp,username,password,result
+2026-04-08T18:55:55Z,testuser,wrongpass1,FAIL
+2026-04-08T18:55:58Z,testuser,wrongpass2,FAIL
+2026-04-08T18:55:58Z,testuser,s3cur3p@ss,SUCCESS
+2026-04-08T18:56:01Z,testuser,bad1,FAIL
+2026-04-08T18:56:04Z,testuser,bad2,FAIL
+2026-04-08T18:56:07Z,testuser,bad3,FAIL
+2026-04-08T18:56:11Z,testuser,wrongpass1,FAIL
+2026-04-08T18:56:14Z,testuser,wrongpass2,FAIL
+2026-04-08T18:56:14Z,testuser,s3cur3p@ss,SUCCESS
+2026-04-08T18:56:17Z,testuser,wrong1,FAIL
+2026-04-08T18:56:20Z,testuser,pässwort,FAIL
+2026-04-08T18:56:20Z,testuser,s3cur3p@ss,SUCCESS

@@ -25,6 +25,17 @@
   "field_tests/test_task2.py::test_script_runs_with_banner_server",
   "field_tests/test_task2.py::test_target_field_matches_argument",
   "field_tests/test_task2.py::test_threading_used",
+  "field_tests/test_task3.py::test_ftp_exhaustion_message",
+  "field_tests/test_task3.py::test_ftp_stops_on_success",
+  "field_tests/test_task3.py::test_ftp_success_message",
+  "field_tests/test_task3.py::test_ftplib_used",
+  "field_tests/test_task3.py::test_handles_messy_wordlist",
+  "field_tests/test_task3.py::test_missing_wordlist_handled",
+  "field_tests/test_task3.py::test_no_input_function_used",
+  "field_tests/test_task3.py::test_paramiko_used",
   "field_tests/test_task3.py::test_placeholder",
+  "field_tests/test_task3.py::test_script_exists",
+  "field_tests/test_task3.py::test_service_argument_validated",
+  "field_tests/test_task3.py::test_sleep_present_in_source",
   "field_tests/test_task4.py::test_placeholder"
 ]
