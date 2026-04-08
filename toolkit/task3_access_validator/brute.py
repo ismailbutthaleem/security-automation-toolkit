@@ -47,6 +47,20 @@ def valid_port(value: str) -> int:
     return port
 
 
+def verify_service_alive(target: str, port: int) -> None:
+    """
+    Confirm the target service is reachable before brute forcing.
+    Raises ServiceUnavailableError if the service cannot be reached.
+    """
+    try:
+        with socket.create_connection((target, port), timeout=5):
+            return
+    except OSError as error:
+        raise ServiceUnavailableError(
+            f"Service unavailable on {target}:{port}"
+        ) from error
+
+
 def parse_arguments():
     """
     Parse CLI arguments using argparse (no input()).
@@ -229,6 +243,13 @@ def main():
 
         # Choose correct function dynamically
         attempt_function = attempt_ftp if args.service == "ftp" else attempt_ssh
+
+        # Verify target is operative
+        try:
+            verify_service_alive(args.target, port)
+        except ServiceUnavailableError as error:
+            print(f"[-] ERROR: {error}", file=sys.stderr)
+            sys.exit(1)
 
         # Main brute loop
         for password in passwords:
