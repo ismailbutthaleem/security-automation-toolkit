@@ -542,7 +542,23 @@ Also revisit whether internal access to the FTP service remains possible despite
 
 ## Week 3 — Task 3: Access Validator
 
-### [DATE] — Session A
+### [09-04-2026] — Session A
+### [Week 3 — Session A] — Task 3: Access Validator
+
+**What I built / changed:**
+Implemented brute.py as a credential testing tool supporting both FTP (ftplib) and SSH (paramiko). The script accepts CLI arguments using argparse and loads a wordlist to test passwords sequentially. Added logging functionality to record each attempt into a CSV file. After initial implementation and passing pytest, I improved the script by adding port validation, structured error handling, a service availability pre-check, and separation between authentication failure and service failure using a custom exception. Also added attempt counting and a verbose mode for optional visibility of each attempt.
+
+**What broke and how I fixed it:**
+Initially had an issue where the variable "success" was being used before it was defined inside the loop, which caused the script to crash. Fixed this by ensuring the authentication function runs before logging and condition checks. Also noticed that without proper error handling, invalid file paths or unreachable services would cause the script to fail unpredictably. Fixed this by wrapping file operations and service checks in try/except blocks and using stderr with proper exit codes.
+
+**Decisions I made and why:**
+Decided to add a service availability check before starting the brute-force loop to avoid wasting time attempting passwords against a dead service. Chose to separate authentication errors from network errors to improve accuracy and make debugging easier. Implemented port validation using a custom argparse type to catch invalid input early. Added a verbose flag instead of printing every attempt by default to avoid breaking the required output format for pytest while still allowing detailed runtime visibility when needed.
+
+**What the tool output when I ran it against Metasploitable:**
+Tool not tested againts metasploitable yet, planning on executing that in session B, the tool passes pytest. However by default pytest triggers the tool into making some madeup users with passwords, this indicates the tool has a high chance of bein functional on first try againts a live target, this hypothesis will be corraborated in session B.
+
+**Questions or things to revisit:**
+Have to try the tool against a real target.
 
 ### [DATE] — Session B
 
