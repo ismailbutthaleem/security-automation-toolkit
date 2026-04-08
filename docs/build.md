@@ -546,7 +546,9 @@ Also revisit whether internal access to the FTP service remains possible despite
 ### [Week 3 — Session A] — Task 3: Access Validator
 
 **What I built / changed:**
-Implemented brute.py as a credential testing tool supporting both FTP (ftplib) and SSH (paramiko). The script accepts CLI arguments using argparse and loads a wordlist to test passwords sequentially. Added logging functionality to record each attempt into a CSV file. After initial implementation and passing pytest, I improved the script by adding port validation, structured error handling, a service availability pre-check, and separation between authentication failure and service failure using a custom exception. Also added attempt counting and a verbose mode for optional visibility of each attempt.
+Implemented brute.py as a credential testing tool supporting both FTP (ftplib) and SSH (paramiko). This is abrute force tool that takes usernames from:
+/etc/passwd
+Which are the potential targets and a wordlist to iterate thru. The script accepts CLI arguments using argparse and loads a wordlist to test passwords sequentially. Added logging functionality to record each attempt into a CSV file. After initial implementation and passing pytest, I improved the script by adding port validation, structured error handling, a service availability pre-check, and separation between authentication failure and service failure using a custom exception. Also added attempt counting and a verbose mode for optional visibility of each attempt.
 
 **What broke and how I fixed it:**
 Initially had an issue where the variable "success" was being used before it was defined inside the loop, which caused the script to crash. Fixed this by ensuring the authentication function runs before logging and condition checks. Also noticed that without proper error handling, invalid file paths or unreachable services would cause the script to fail unpredictably. Fixed this by wrapping file operations and service checks in try/except blocks and using stderr with proper exit codes.
