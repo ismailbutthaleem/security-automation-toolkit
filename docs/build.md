@@ -575,8 +575,58 @@ Tool not tested againts metasploitable yet, planning on executing that in sessio
 **Questions or things to revisit:**
 Have to try the tool against a real target.
 
-### [DATE] — Session B
+### [09-04-2026] — Session B
 
+**What I built / changed:**
+
+Tried running the brute force tool against metasploitable using all the positional arguments possible, used a madeup wordlist file with whitespaces incorrect passwords and the actual correct password:
+
+password 123
+admin
+
+letmein
+password
+msfadmin
+wrongpass
+
+vagrant
+
+The decision of making the file contan whitespaces is intentional to test the tool behaviour on blank lines.
+**What broke and how I fixed it:**
+
+First error just poped which says:
+
+[-] ERROR: Wordlist is empty after cleaning.
+
+Which means that after removing the blank lines no lines with content were found, which is in fact wrong as the file has got content inside of it, this indicates that the script whitespaces handling is incorrect.
+
+After inspecting the code it was found that everything was fine so the issue was narrowed down to a system internal issue such as the system not having saved the wordlist therefore the tool sees its contents as empty.
+
+wordlist.txt was saved and the issue was solved, this indicates that the error message given was too broad, the file path and the file itself did exists but as the file content was not saved, and that is why that error popped up.
+
+To solve the issue the file was saved internally.
+**Decisions I made and why:**
+
+Change the error message so the user checks both scenarios either that the file exists but its empty or that after cleaning it nothing was found inside. This line of code was updated:
+
+if not passwords:
+    print("[-] ERROR: Wordlist is empty after cleaning.", file=sys.stderr)
+    sys.exit(1)
+
+this line now is:
+
+if not passwords:
+    print(
+        "[-] ERROR: Wordlist contains no valid passwords (file may be empty or only whitespace).",
+        file=sys.stderr
+    )
+    sys.exit(1)
+
+The feedback given to the user is now more informative and saves the user troubleshooting time.
+
+**What the tool output when I ran it against Metasploitable:**
+
+**Questions or things to revisit:**
 ---
 
 ## Week 4 — Task 4: Web Enumerator

@@ -245,7 +245,10 @@ def main():
 
         # Handle empty file after cleaning
         if not passwords:
-            print("[-] ERROR: Wordlist is empty after cleaning.", file=sys.stderr)
+            print(
+                "[-] ERROR: Wordlist contains no valid passwords (file may be empty or only whitespace)",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         # Choose correct function dynamically

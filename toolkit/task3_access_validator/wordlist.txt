@@ -1,0 +1,9 @@
+password 123
+admin
+
+letmein
+password
+msfadmin
+wrongpass
+
+vagrant
