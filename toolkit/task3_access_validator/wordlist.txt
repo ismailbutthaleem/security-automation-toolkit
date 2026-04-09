@@ -6,4 +6,6 @@ password
 msfadmin
 wrongpass
 
+vasgaga
+pass
 vagrant

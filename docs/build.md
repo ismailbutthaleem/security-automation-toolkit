@@ -626,6 +626,16 @@ The feedback given to the user is now more informative and saves the user troubl
 
 **What the tool output when I ran it against Metasploitable:**
 
+The tool successfully found the correct password, however if the argument --verbose was working wanted to be tested, in the first run we got a small delay then the message:
+
+[+] SUCCESS: Password found: vagrant
+
+This output does not necessarily mean that --verbose is broken, it could just mean that it found the password in the first attempt. However even when changing the correct password to another line and adding more passwords the output is still the same with a small delay, this confirms the theory that --verbose is not working as expected.
+
+Fix:
+
+
+
 **Questions or things to revisit:**
 ---
 
