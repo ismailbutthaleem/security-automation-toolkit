@@ -94,9 +94,11 @@ def parse_arguments():
     )
     parser.add_argument("--ports", default="1-1024", help="select a port range")
     parser.add_argument(
-        "--timeout", default=0.5, type=float, help="timeout duration in seconds"
+        "--timeout", default=0.5, type=valid_timeout, help="timeout duration in seconds"
     )
-    parser.add_argument("--threads", default=50, type=int, help="number of threads")
+    parser.add_argument(
+        "--threads", default=50, type=valid_threads, help="number of threads"
+    )
     args = parser.parse_args()
     return args
 
@@ -217,42 +219,75 @@ def check_port(target: str, port: int, timeout: float) -> dict | None:
         sock.close()
 
 
-def main():
-    args = parse_arguments()
-    # TODO: Wire parse_arguments → parse_port_input → ThreadPoolExecutor
-    #       → collect results → write JSON output
-
+# Ensure only a valid float is used as timeout
+def valid_timeout(value: str) -> float:
+    """
+    Ensure timeout is a positive number.
+    """
     try:
-        ports = parse_port_input(args.ports)
+        timeout = float(value)
     except ValueError as error:
-        print(f"Error: {error}", file=sys.stderr)
-        sys.exit(1)
+        raise argparse.ArgumentTypeError("Timeout must be a number.") from error
 
-    open_ports = []
+    if timeout <= 0:
+        raise argparse.ArgumentTypeError("Timeout must be greater than 0.")
 
-    with ThreadPoolExecutor(max_workers=args.threads) as executor:
-        futures = {
-            executor.submit(check_port, args.target, port, args.timeout): port
-            for port in ports
+    return timeout
+
+
+# Ensure a number greater than 0 is used for threads
+def valid_threads(value: str) -> int:
+    """Ensure threads is a positive number"""
+    try:
+        threads = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("Threads must be a positive number")
+    if threads <= 0:
+        raise argparse.ArgumentTypeError("Threads must be greater  than 0.")
+    return threads
+
+
+def main():
+    try:
+        args = parse_arguments()
+        # TODO: Wire parse_arguments → parse_port_input → ThreadPoolExecutor
+        #       → collect results → write JSON output
+
+        try:
+            ports = parse_port_input(args.ports)
+        except ValueError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            sys.exit(1)
+
+        open_ports = []
+
+        with ThreadPoolExecutor(max_workers=args.threads) as executor:
+            futures = {
+                executor.submit(check_port, args.target, port, args.timeout): port
+                for port in ports
+            }
+
+            for future in futures:
+                result = future.result()
+                if result is not None:
+                    open_ports.append(result)
+
+        open_ports.sort(key=lambda item: item["port"])
+
+        output = {
+            "target": args.target,
+            "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "open_ports": open_ports,
         }
 
-        for future in futures:
-            result = future.result()
-            if result is not None:
-                open_ports.append(result)
+        json_output = json.dumps(output, indent=2)
 
-    open_ports.sort(key=lambda item: item["port"])
-
-    output = {
-        "target": args.target,
-        "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "open_ports": open_ports,
-    }
-
-    json_output = json.dumps(output, indent=2)
-
-    print(json_output)
-    Path(args.output).write_text(json_output)
+        print(json_output)
+        Path(args.output).write_text(json_output)
+    # Handle harsh exits cause by a keyboard combination
+    except KeyboardInterrupt:
+        print("\n[-] INTERRUPTED: Execution stopped by user.", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
