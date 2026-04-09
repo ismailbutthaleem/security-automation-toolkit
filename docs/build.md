@@ -658,6 +658,8 @@ After a successful run the output with --verbose should look something like this
 
 Make sure brute force tool can handle any type of file with whitespaces or malformed lines, test it againts other wordlists.
 
+Also have in mind that to try and crack a password that we actually dont know we would use a wordlist more powerful than the sample one used for this try against the vagrant machine. A wordlist like rockyou.txt
+
 ## Week 4 — Task 4: Web Enumerator
 
 ### [DATE] — Session A
