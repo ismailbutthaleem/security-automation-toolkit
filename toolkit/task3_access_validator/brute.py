@@ -269,7 +269,7 @@ def main():
 
             attempt_count += 1  # Count each attempt
 
-            if args.verbose:
+            if args.verbose:  # Detailed output of attempt number and password tried
                 print(f"[*] Attempt {attempt_count}: trying password '{password}'")
 
             try:

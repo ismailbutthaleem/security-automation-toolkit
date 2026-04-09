@@ -632,12 +632,31 @@ The tool successfully found the correct password, however if the argument --verb
 
 This output does not necessarily mean that --verbose is broken, it could just mean that it found the password in the first attempt. However even when changing the correct password to another line and adding more passwords the output is still the same with a small delay, this confirms the theory that --verbose is not working as expected.
 
-Fix:
+The args.verbose was missing in the code therefore the value of this args was never beign returned anywhere that beign the reason no detailed output was ever given to fix that, the code:
 
+if args.verbose:
+                print(f"[*] Attempt {attempt_count}: trying password '{password}'")
+
+Was added inside the main brute loop at line 272.
+
+After a successful run the output with --verbose should look something like this:
+
+[*] Attempt 1: trying password 'password 123'
+[*] Attempt 2: trying password 'admin'
+[*] Attempt 3: trying password 'letmein'
+[*] Attempt 4: trying password 'password'
+[*] Attempt 5: trying password 'msfadmin'
+[*] Attempt 6: trying password 'wrongpass'
+[*] Attempt 7: trying password 'vasgaga'
+[*] Attempt 8: trying password 'pass'
+[*] Attempt 9: trying password 'vagrant'
+[+] SUCCESS: Password found: vagrant
 
 
 **Questions or things to revisit:**
 ---
+
+Make sure brute force tool can handle any type of file with whitespaces or malformed lines, test it againts other wordlists.
 
 ## Week 4 — Task 4: Web Enumerator
 
