@@ -47,6 +47,7 @@ def valid_port(value: str) -> int:
     return port
 
 
+# Verify that the serice is running before attempting brute force
 def verify_service_alive(target: str, port: int) -> None:
     """
     Confirm the target service is reachable before brute forcing.
