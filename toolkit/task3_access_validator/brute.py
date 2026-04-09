@@ -70,7 +70,7 @@ def parse_arguments():
         description="Targeted credential testing tool for FTP and SSH."
     )
 
-    parser.add_argument("target", help="Target IP address or hostname")
+    parser.add_argument("--target", help="Target IP address or hostname")
 
     parser.add_argument(
         "--service",
