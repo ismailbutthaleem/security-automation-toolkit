@@ -539,6 +539,19 @@ Consider implementing a permanent fix by upgrading or recompiling the ProFTPD se
 
 Also revisit whether internal access to the FTP service remains possible despite external blocking, and whether additional controls are required.
 
+### [09-04-2026]
+
+**What I built/ changed**
+
+made the scanner more robus by implementing various error handling methods:
+
+1. Ensure threads is only a number and greater than0 otheriwse display appropiate fail message.
+2. Ensure timeout is a float not a string or negative number
+3. Handle user keyboard exits witout crashing
+
+**Decisions I made and why:**
+
+Bad input is a risk that could cause the script to crash, it is better to ensure all argparse functions can handle bad input to ensure a successful tool operation
 
 ## Week 3 — Task 3: Access Validator
 
