@@ -70,7 +70,11 @@ def parse_arguments():
         description="Targeted credential testing tool for FTP and SSH."
     )
 
-    parser.add_argument("--target", help="Target IP address or hostname")
+    parser.add_argument(
+        "--target",
+        required=True,
+        help="Target IP address or hostname",
+    )
 
     parser.add_argument(
         "--service",
@@ -126,20 +130,28 @@ def load_wordlist(wordlist_path: Path) -> list[str]:
         return [line.strip() for line in file if line.strip()]
 
 
+def initialise_log(output_path: Path) -> None:
+    """
+    Start a fresh CSV log for this run.
+    """
+    try:
+        with output_path.open("w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["timestamp", "username", "password", "result"])
+
+    except OSError as error:
+        print(f"[-] ERROR: Could not initialise log file: {error}", file=sys.stderr)
+        sys.exit(1)
+
+
 def log_attempt(output_path: Path, user: str, password: str, result: str) -> None:
     """
     Log each attempt to CSV (evidence trail).
     Creates file if it doesn't exist.
     """
-    write_header = not output_path.exists() or output_path.stat().st_size == 0
-
     try:
         with output_path.open("a", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
-
-            # Write header only once
-            if write_header:
-                writer.writerow(["timestamp", "username", "password", "result"])
 
             writer.writerow(
                 [
@@ -225,6 +237,73 @@ def attempt_ssh(target: str, port: int, user: str, password: str) -> bool:
         client.close()
 
 
+def run_credential_test(
+    host: str,
+    port: int,
+    user: str,
+    passwords: list[str],
+    attempt_function,
+    output_path: Path,
+    verbose: bool = False,
+) -> str | None:
+    """
+    Run the brute-force loop.
+    Returns the found password on success, or None if exhausted.
+    """
+    # Initialize attempt counter
+    attempt_count = 0
+
+    # Main brute loop
+    for password in passwords:
+        attempt_count += 1  # Count each attempt
+
+        if verbose:  # Detailed output of attempt number and password tried
+            print(f"[*] Attempt {attempt_count}: trying password '{password}'")
+
+        try:
+            success = attempt_function(
+                host,
+                port,
+                user,
+                password,
+            )
+
+        except ServiceUnavailableError as error:
+            print(
+                f"[-] ERROR: {error} (possible timeout or glitch), skipping.",
+                file=sys.stderr,
+            )
+
+            # Log every attempt
+            log_attempt(
+                output_path,
+                user,
+                password,
+                "ERROR",
+            )
+
+            # Mandatory delay
+            time.sleep(0.1)
+            continue
+
+        # Log every attempt
+        log_attempt(
+            output_path,
+            user,
+            password,
+            "SUCCESS" if success else "FAIL",
+        )
+
+        # Stop immediately on success
+        if success:
+            return password
+
+        # Mandatory delay
+        time.sleep(0.1)
+
+    return None
+
+
 def main():
     try:
         args = parse_arguments()
@@ -261,47 +340,22 @@ def main():
             print(f"[-] ERROR: {error}", file=sys.stderr)
             sys.exit(1)
 
-        # Initialize attempt counter
-        attempt_count = 0
+        # Start a fresh attempt log for this run
+        initialise_log(args.output)
 
-        # Main brute loop
-        for password in passwords:
+        found_password = run_credential_test(
+            host=args.target,
+            port=port,
+            user=args.user,
+            passwords=passwords,
+            attempt_function=attempt_function,
+            output_path=args.output,
+            verbose=args.verbose,
+        )
 
-            attempt_count += 1  # Count each attempt
-
-            if args.verbose:  # Detailed output of attempt number and password tried
-                print(f"[*] Attempt {attempt_count}: trying password '{password}'")
-
-            try:
-                success = attempt_function(
-                    args.target,
-                    port,
-                    args.user,
-                    password,
-                )
-
-            except ServiceUnavailableError as error:
-                print(
-                    f"[-] ERROR: {error} (possible timeout or glitch), skipping.",
-                    file=sys.stderr,
-                )
-                continue
-
-            # Log every attempt
-            log_attempt(
-                args.output,
-                args.user,
-                password,
-                "SUCCESS" if success else "FAIL",
-            )
-
-            # Stop immediately on success
-            if success:
-                print(f"[+] SUCCESS: Password found: {password}")
-                return
-
-            # Mandatory delay
-            time.sleep(0.1)
+        if found_password:
+            print(f"[+] SUCCESS: Password found: {found_password}")
+            return
 
         # If loop finishes with no success
         print(f"[-] EXHAUSTED: No valid credentials found for user {args.user}")
