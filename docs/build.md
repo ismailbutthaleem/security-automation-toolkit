@@ -660,6 +660,27 @@ Make sure brute force tool can handle any type of file with whitespaces or malfo
 
 Also have in mind that to try and crack a password that we actually dont know we would use a wordlist more powerful than the sample one used for this try against the vagrant machine. A wordlist like rockyou.txt
 
+### [10-04-2026]
+
+**What I built / changed:**
+Added a new more complex wordlist to try brute forcing against the target. This wordlist contains a lot of special character truncated lines, malformed strings, long strings anmd whitespaces.
+
+**What broke and how I fixed it:**
+Brute force tool stopped trying passwords after attempt 184, attempt 184 was a long string with the character word "A", this indicates the tool does not handle bad input very well or it crashes because the time sleep delay is to small,
+therefore exits the operation and outputs and error saying:
+[-] ERROR: FTP service unavailable on 172.16.19.101:21
+
+Although this could be the possible error is not as manually it can be tested that the service and port are up with no firewalls in between.
+
+That proves the hypothesis that either the tool crashes with weird input or the delay is to small so ftp closes the connection and the tool just exits.
+
+**Decisions I made and why:**
+
+**What the tool output when I ran it against Metasploitable:**
+
+**Questions or things to revisit:**
+
+
 ## Week 4 — Task 4: Web Enumerator
 
 ### [DATE] — Session A
