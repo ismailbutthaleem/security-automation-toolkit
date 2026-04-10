@@ -674,12 +674,45 @@ Although this could be the possible error is not as manually it can be tested th
 
 That proves the hypothesis that either the tool crashes with weird input or the delay is to small so ftp closes the connection and the tool just exits.
 
+The problem is in this line:
+
+except ServiceUnavailableError as error:
+                print(f"[-] ERROR: {error}", file=sys.stderr)
+                sys.exit(1)
+
+This part is telling the pogramm to exit if a serviceunavailable error ocurrs.
+
+the:
+
+sys.exit(1)
+
+was changed to:
+
+continue
+
+resulting in:
+
+except ServiceUnavailableError as error:
+                print(f"[-] ERROR: {error} (possible timeout or glitch), skipping.", file=sys.stderr)
+                continue
+
+This tool already checks if the service is available before attempting a brute force attack, so when checking the passwords if there is a temporary service error glitch the tool should not stop but skip that attempt an continue and thats what the new piece of code does exactly, point out there has been a service error in such attempt and that it will be skipped.
+
 **Decisions I made and why:**
+Adding the exception:
+
+ServiceUnavailableError
+
+is a controlled way of cathing a specific run time error when the brute force attack is beign executed, its useful for troubleshooting or post-attack analysis instead of using a generic OSError
 
 **What the tool output when I ran it against Metasploitable:**
+After the fix the password was found, the output file is in:
+
+toolkit/task3_access_validator/posioned_wordlist_output.txt
+
 
 **Questions or things to revisit:**
-
+Tool works against bad input and handles network error gracefully now, error messages are more useful and detailed now.
 
 ## Week 4 — Task 4: Web Enumerator
 

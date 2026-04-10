@@ -281,8 +281,11 @@ def main():
                 )
 
             except ServiceUnavailableError as error:
-                print(f"[-] ERROR: {error}", file=sys.stderr)
-                sys.exit(1)
+                print(
+                    f"[-] ERROR: {error} (possible timeout or glitch), skipping.",
+                    file=sys.stderr,
+                )
+                continue
 
             # Log every attempt
             log_attempt(
