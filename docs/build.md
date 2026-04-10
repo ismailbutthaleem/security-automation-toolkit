@@ -663,9 +663,11 @@ Also have in mind that to try and crack a password that we actually dont know we
 ### [10-04-2026]
 
 **What I built / changed:**
+
 Added a new more complex wordlist to try brute forcing against the target. This wordlist contains a lot of special character truncated lines, malformed strings, long strings anmd whitespaces.
 
 **What broke and how I fixed it:**
+
 Brute force tool stopped trying passwords after attempt 184, attempt 184 was a long string with the character word "A", this indicates the tool does not handle bad input very well or it crashes because the time sleep delay is to small,
 therefore exits the operation and outputs and error saying:
 [-] ERROR: FTP service unavailable on 172.16.19.101:21
@@ -699,6 +701,7 @@ except ServiceUnavailableError as error:
 This tool already checks if the service is available before attempting a brute force attack, so when checking the passwords if there is a temporary service error glitch the tool should not stop but skip that attempt an continue and thats what the new piece of code does exactly, point out there has been a service error in such attempt and that it will be skipped.
 
 **Decisions I made and why:**
+
 Adding the exception:
 
 ServiceUnavailableError
@@ -706,13 +709,55 @@ ServiceUnavailableError
 is a controlled way of cathing a specific run time error when the brute force attack is beign executed, its useful for troubleshooting or post-attack analysis instead of using a generic OSError
 
 **What the tool output when I ran it against Metasploitable:**
+
 After the fix the password was found, the output file is in:
 
 toolkit/task3_access_validator/posioned_wordlist_output.txt
 
 
 **Questions or things to revisit:**
+
 Tool works against bad input and handles network error gracefully now, error messages are more useful and detailed now.
+
+[10-04-2026] — Task 3: Access Validator (Refactor & Stability Fix)
+
+**What I built / changed:**
+
+Refactored the brute-force logic in brute.py to make it cleaner and more reliable during execution.
+
+Originally, the main brute loop was written directly inside main(), which made the script harder to follow and debug. I moved this logic into a separate function run_credential_test() so that the password testing process is isolated and reusable. This also makes it easier to switch between FTP and SSH since both now use the same loop structure via the attempt_function. A modular approach was followed to match the rest of the approach in the build of the tool.
+
+Also added a new function initialise_log() which creates a fresh attempt_log.csv file at the start of each run. Previously, the log file was opened in append mode ("a"), which caused old data to stay in the file and mix with new results. This made the number of linees in the CSV not match the attempt counter shown in the terminal.
+
+The logging function was updated so it now only appends rows, while the header is written once at the start of the run.
+
+**Decisions I made and why:**
+
+Decided to keep ServiceUnavailableError instead of removing it, as it allows cleaner separation between actual service failures and incorrect credentials. It is now used differently depending on context:
+
+Before the brute loop → treated as fatal (script exits)
+During brute loop → treated as temporary (script continues)
+
+Chose to initialise the log file with "w" mode at the start of each run instead of continuously appending. This ensures that each execution produces a clean and readable evidence file, which is easier to analyse and avoids confusion when comparing attempt counts.
+
+Refactoring the brute loop into run_credential_test() was done to improve structure and readability rather than functionality. This makes the code easier to maintain and aligns better with a more modular design.
+
+**What the tool output when I ran it against Metasploitable:**
+
+When running against the FTP service on Metasploitable with a large wordlist, the tool now continues execution even when temporary connection issues occur.
+
+Example behaviour:
+
+Attempts are printed sequentially with --verbose
+Temporary errors are displayed as warnings instead of stopping execution
+Log file records each attempt as SUCCESS, FAIL, or ERROR
+Script successfully continues through the wordlist instead of stopping prematurely
+
+The attempt_log.csv now correctly reflects only the current run, with no leftover entries from previous executions.
+
+**Questions or things to revisit:**
+
+Review whether the delay (0.1) is sufficient under heavier wordlists or if adaptive delays would improve stability.
 
 ## Week 4 — Task 4: Web Enumerator
 
