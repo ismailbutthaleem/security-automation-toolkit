@@ -360,7 +360,7 @@ def main():
         print(f"[-] EXHAUSTED: No valid credentials found for user {args.user}")
 
     except KeyboardInterrupt:
-        print("\n[-] INTERRUPTED: Execution stopped by user.", file=sys.stderr)
+        print("\n[-] INTERRUPTED: Execution stopped by user.(ctl+C)", file=sys.stderr)
         sys.exit(1)
 
 
