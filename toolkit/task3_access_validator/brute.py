@@ -71,8 +71,7 @@ def parse_arguments():
     )
 
     parser.add_argument(
-        "--target",
-        required=True,
+        "target",
         help="Target IP address or hostname",
     )
 

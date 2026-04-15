@@ -107,3 +107,9 @@ scanner against different inputs and verified JSON output remains correct. |
 
 
 | Week 3 | Task 3 | How should I manage logging so results are clean per run? | Suggested separating file initialisation from logging and using "w" once per run, then "a" for writing attempts. | Added initialise_log() and simplified log_attempt(). Verified CSV resets correctly each run and logs attempts accurately. |
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+| Week 3 | Task 3 | Why are multiple pytest tests failing even though my brute force logic looks correct? | Suggested checking the full pytest error output instead of focusing only on failing test names. Identified that the issue could be at argument parsing level rather than inside the brute-force loop. | Reviewed pytest output and found error related to missing `--target` argument. Compared script CLI with field test invocation and identified mismatch (positional vs optional argument). Updated parser to use positional `target`. Re-ran pytest and confirmed multiple failures were resolved as script now executes correctly. |

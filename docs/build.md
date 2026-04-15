@@ -759,6 +759,57 @@ The attempt_log.csv now correctly reflects only the current run, with no leftove
 
 Review whether the delay (0.1) is sufficient under heavier wordlists or if adaptive delays would improve stability.
 
+### [15-04-2026]
+
+**What I built / changed:**
+
+Pytest was throwing the following errors during Task 3 testing:
+
+FAILED field_tests/test_task3.py::test_ftp_success_message - AssertionError: Script exited with error:
+FAILED field_tests/test_task3.py::test_ftp_exhaustion_message - AssertionError: Expected exhaustion message not found in stdout:
+FAILED field_tests/test_task3.py::test_ftp_stops_on_success - AssertionError: Script exited with error:
+FAILED field_tests/test_task3.py::test_handles_messy_wordlist - AssertionError: Script crashed on messy wordlist:
+
+After checking the full pytest output more closely, it became clear that the actual error was related to how the script parsed the target argument:
+
+error: the following arguments are required: --target
+
+This showed that the real problem was not the brute-force logic itself, but that the script was failing at argument parsing stage before it could reach the FTP testing logic.
+
+Although the target value was being passed by the test, my script expected it in a different format to the one used by pytest.
+
+**What broke and how I fixed it:**
+
+The issue was caused by defining the target as a required optional argument:
+
+parser.add_argument(
+    "--target",
+    required=True,
+    help="Target IP address or hostname",
+)
+
+However, the pytest field test called the script using the target as a positional argument, not --target.
+
+To fix this, the argument definition was changed to:
+
+parser.add_argument(
+    "target",
+    help="Target IP address or hostname",
+)
+
+Once this change was made, the script matched the field test contract correctly and the failing tests were able to execute the actual brute-force logic.
+
+**Decisions I made and why:**
+
+I changed --target to target because the field tests expected the target as a positional argument. Without this change, argparse stopped the script immediately and exited before the FTP functions, success message, exhaustion message, or wordlist handling could be tested.
+
+This explained why several tests appeared to fail at once even though the real issue was only one mismatch in the command-line argument format.
+
+
+**Questions or things to revisit:**
+
+Read the field test contract more carefully before changing working code, especially CLI argument format, because one mismatch at parser level can prevent the whole script from running and make multiple tests fail at the same time.
+
 ## Week 4 — Task 4: Web Enumerator
 
 ### [DATE] — Session A
