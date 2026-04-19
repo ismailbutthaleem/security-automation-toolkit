@@ -37,5 +37,19 @@
   "field_tests/test_task3.py::test_script_exists",
   "field_tests/test_task3.py::test_service_argument_validated",
   "field_tests/test_task3.py::test_sleep_present_in_source",
-  "field_tests/test_task4.py::test_placeholder"
+  "field_tests/test_task4.py::test_beautifulsoup_used",
+  "field_tests/test_task4.py::test_comments_section_present",
+  "field_tests/test_task4.py::test_headers_section_present",
+  "field_tests/test_task4.py::test_html_comments_extracted",
+  "field_tests/test_task4.py::test_no_input_function_used",
+  "field_tests/test_task4.py::test_placeholder",
+  "field_tests/test_task4.py::test_requests_used",
+  "field_tests/test_task4.py::test_script_exists",
+  "field_tests/test_task4.py::test_script_runs_without_error",
+  "field_tests/test_task4.py::test_sensitive_path_found_status",
+  "field_tests/test_task4.py::test_sensitive_path_not_found_status",
+  "field_tests/test_task4.py::test_sensitive_paths_checked",
+  "field_tests/test_task4.py::test_sensitive_paths_section_present",
+  "field_tests/test_task4.py::test_server_header_reported",
+  "field_tests/test_task4.py::test_xpoweredby_header_reported"
 ]

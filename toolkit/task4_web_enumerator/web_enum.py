@@ -41,11 +41,8 @@ CONSTRAINTS
 - Must use requests and beautifulsoup4 (bs4).
 - Set a request timeout (default 5s) — never hang.
 - Handle redirects gracefully (requests does this by default — be aware of it).
-<<<<<<< HEAD
 - NO use of input() — all input via argparse.
-=======
 - NO use of the input built-in — all input via argparse.
->>>>>>> template/main
 
 OUTPUT CONTRACT (auto-grader depends on this)
 ---------------------------------------------
@@ -84,16 +81,12 @@ from urllib.parse import urljoin, urlparse
 
 try:
     import requests
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup, Comment
 except ImportError as e:
-<<<<<<< HEAD
-    print(f"[-] Missing dependency: {e}. Run: pip install requests beautifulsoup4", file=sys.stderr)
-=======
     print(
         f"[-] Missing dependency: {e}. Run: pip install requests beautifulsoup4",
         file=sys.stderr,
     )
->>>>>>> template/main
     sys.exit(1)
 
 
@@ -104,6 +97,14 @@ SENSITIVE_PATHS = [
     "/phpmyadmin",
     "/login",
     "/.git",
+    "/drupal",
+    "/drupal/CHANGELOG.txt",
+    "/dbadmin",
+    "/backup",
+    "/backup.zip",
+    "/dev",
+    "/test",
+    "/.env" "/config.php",
 ]
 
 
@@ -115,8 +116,17 @@ def parse_arguments():
     Required: url (positional)
     Optional: --timeout (default 5)
     """
-    # TODO: Implement argparse
-    pass
+    parser = argparse.ArgumentParser(
+        description="HTTP enumeration tool — analyse headers, extract comments, probe paths"
+    )
+    parser.add_argument("url", help="Target URL (e.g., http://172.16.19.101)")
+    parser.add_argument(
+        "--timeout",
+        type=int,
+        default=5,
+        help="Request timeout in seconds (default: 5)",
+    )
+    return parser.parse_args()
 
 
 def analyse_headers(response: requests.Response) -> dict:
@@ -130,8 +140,24 @@ def analyse_headers(response: requests.Response) -> dict:
         Dict of relevant header names to values.
         Use "Not present" for missing headers.
     """
-    # TODO: Extract Server, X-Powered-By, and any other revealing headers
-    pass
+    relevant_headers = {
+        "Server": response.headers.get("Server", "Not present"),
+        "X-Powered-By": response.headers.get("X-Powered-By", "Not present"),
+    }
+
+    # Add any other revealing headers if present
+    optional_headers = [
+        "X-AspNet-Version",
+        "X-Generator",
+        "Via",
+        "X-Backend-Server",
+    ]
+
+    for header in optional_headers:
+        if header in response.headers:
+            relevant_headers[header] = response.headers[header]
+
+    return relevant_headers
 
 
 def extract_comments(html: str) -> list[str]:
@@ -144,10 +170,9 @@ def extract_comments(html: str) -> list[str]:
     Returns:
         List of comment strings (stripped of <!-- --> delimiters).
     """
-    # TODO: Use BeautifulSoup to find Comment objects
-    # from bs4 import Comment
-    # soup.find_all(string=lambda text: isinstance(text, Comment))
-    pass
+    soup = BeautifulSoup(html, "html.parser")
+    comments = soup.find_all(string=lambda text: isinstance(text, Comment))
+    return [comment.strip() for comment in comments if comment.strip()]
 
 
 def check_sensitive_paths(base_url: str, timeout: int) -> dict:
@@ -161,16 +186,70 @@ def check_sensitive_paths(base_url: str, timeout: int) -> dict:
     Returns:
         Dict mapping path string to status code integer (or None if error).
     """
-    # TODO: Iterate SENSITIVE_PATHS, HEAD or GET request each, record status
-    # Use urljoin to construct full URLs safely
-    pass
+    results = {}
+
+    for path in SENSITIVE_PATHS:
+        full_url = urljoin(base_url.rstrip("/") + "/", path.lstrip("/"))
+
+        try:
+            response = requests.get(full_url, timeout=timeout, allow_redirects=False)
+            results[path] = response.status_code
+        except requests.exceptions.RequestException:
+            results[path] = None
+
+    return results
 
 
 def main():
     args = parse_arguments()
-    # TODO: Wire parse_arguments → analyse_headers → extract_comments
-    #       → check_sensitive_paths → print formatted output
-    pass
+
+    # Basic validation — ensure URL includes scheme like http://
+    parsed = urlparse(args.url)
+    if not parsed.scheme or not parsed.netloc:
+        print(
+            "[-] ERROR: Please provide a valid URL including http:// or https://",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Main page request
+    try:
+        response = requests.get(args.url, timeout=args.timeout)
+    except requests.exceptions.RequestException as e:
+        print(f"[-] ERROR: Could not connect to {args.url}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    headers = analyse_headers(response)
+    comments = extract_comments(response.text)
+    path_results = check_sensitive_paths(args.url, args.timeout)
+
+    # Print formatted output
+    print("[HEADERS]")
+    print(f"Server: {headers.get('Server', 'Not present')}")
+    print(f"X-Powered-By: {headers.get('X-Powered-By', 'Not present')}")
+
+    for key, value in headers.items():
+        if key not in ("Server", "X-Powered-By"):
+            print(f"{key}: {value}")
+
+    print()
+    print("[COMMENTS]")
+    print(f"Found {len(comments)} HTML comment(s):")
+    if comments:
+        for index, comment in enumerate(comments, start=1):
+            print(f"{index}. {comment}")
+
+    print()
+    print("[SENSITIVE PATHS]")
+    for path, status_code in path_results.items():
+        if status_code is None:
+            print(f"{path:<16} → ERROR")
+        elif status_code == 200:
+            print(f"{path:<16} → FOUND ({status_code})")
+        elif status_code == 403:
+            print(f"{path:<16} → Forbidden ({status_code})")
+        else:
+            print(f"{path:<16} → NOT FOUND ({status_code})")
 
 
 if __name__ == "__main__":
