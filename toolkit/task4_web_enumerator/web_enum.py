@@ -76,6 +76,8 @@ This intelligence feeds directly into the Vulnerability Hunt diagnosis phase.
 
 # Your imports go here
 import argparse
+import json
+from pathlib import Path
 import sys
 from urllib.parse import urljoin, urlparse
 
@@ -108,6 +110,32 @@ SENSITIVE_PATHS = [
 ]
 
 
+def save_results_to_json(
+    output_path: Path,
+    target_url: str,
+    headers: dict,
+    comments: list[str],
+    sensitive_paths: dict,
+) -> None:
+    """
+    Save web enumeration results to a JSON file.
+    """
+    data = {
+        "target": target_url,
+        "headers": headers,
+        "comments": comments,
+        "sensitive_paths": sensitive_paths,
+    }
+
+    try:
+        with output_path.open("w", encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
+
+    except OSError as error:
+        print(f"[-] ERROR: Could not write JSON file: {error}", file=sys.stderr)
+        sys.exit(1)
+
+
 def parse_arguments():
     """
     Define and parse command-line arguments.
@@ -125,6 +153,10 @@ def parse_arguments():
         type=int,
         default=5,
         help="Request timeout in seconds (default: 5)",
+    )
+    parser.add_argument(
+        "--output", type=Path, 
+        default=Path("web_results.json"),
     )
     return parser.parse_args()
 
@@ -218,10 +250,23 @@ def main():
     except requests.exceptions.RequestException as e:
         print(f"[-] ERROR: Could not connect to {args.url}: {e}", file=sys.stderr)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n[-] INTERRUPTED: Execution stopped by user.(ctl+C)", file=sys.stderr)
+        sys.exit(1)
 
     headers = analyse_headers(response)
     comments = extract_comments(response.text)
     path_results = check_sensitive_paths(args.url, args.timeout)
+
+
+    # Save results to a JSON file
+    save_results_to_json(
+    Path("web_enum_results.json"),
+    args.url,
+    headers,
+    comments,
+    path_results,
+)
 
     # Print formatted output
     print("[HEADERS]")
