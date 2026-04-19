@@ -812,7 +812,30 @@ Read the field test contract more carefully before changing working code, especi
 
 ## Week 4 — Task 4: Web Enumerator
 
-### [DATE] — Session A
+### [19-04-2026] — Session A
+
+**What I built / changed**
+
+Built the initial version of the web_enum.py tool following the provided scaffold. The tool sends an HTTP request to a target, extracts key response headers (Server, X-Powered-By), parses HTML to retrieve comments, and checks a set of sensitive paths for their status codes. This forms the base for passive web reconnaissance before moving into exploitation.
+
+**What broke and how I fixed it:**
+
+No major issues during initial implementation. Minor adjustments were made to the sensitive paths list to ensure correct formatting and compatibility with the output structure expected by the task.
+
+**Decisions I made and why:**
+
+Extended the default sensitive paths list with a small number of additional common paths (e.g., backup and development directories). This was done to improve the likelihood of identifying exposed resources while still adhering to the constraint of not performing excessive enumeration.
+
+**What the tool output when I ran it against Metasploitable:**
+
+Not tested yet — this will be completed in the next session to validate functionality and gather reconnaissance data.
+
+**Questions or things to revisit:**
+
+Validate tool output against pytest to ensure it meets the required contract
+Test against Metasploitable and document any discovered comments, headers, or paths
+Review output formatting to ensure consistency with assessment requirements
+Consider improving error handling and response interpretation (e.g., handling timeouts, redirects, and 403 responses more clearly)
 
 **Metasploitable web recon output:**
 

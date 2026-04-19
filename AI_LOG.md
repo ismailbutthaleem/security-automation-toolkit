@@ -113,3 +113,9 @@ scanner against different inputs and verified JSON output remains correct. |
 |      |      |             |                   |                                |
 
 | Week 3 | Task 3 | Why are multiple pytest tests failing even though my brute force logic looks correct? | Suggested checking the full pytest error output instead of focusing only on failing test names. Identified that the issue could be at argument parsing level rather than inside the brute-force loop. | Reviewed pytest output and found error related to missing `--target` argument. Compared script CLI with field test invocation and identified mismatch (positional vs optional argument). Updated parser to use positional `target`. Re-ran pytest and confirmed multiple failures were resolved as script now executes correctly. |
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+| Week 4 | Task 4 | Explain how the web_enum.py tool works and what I actually need to understand for the assignment | Broke down the tool into simple components (argparse, requests, BeautifulSoup, path checking) and explained the overall flow instead of focusing on memorising code. Clarified how the tool performs passive reconnaissance by reading headers, extracting HTML comments, and checking sensitive paths. Also explained how each part links to decision-making in the attack phase. | Reviewed explanation and reduced it to core flow: send request → analyse headers → extract comments → check paths → interpret results. Confirmed understanding of what each output means (200/403/404) and how it affects next steps (use creds, brute force, or CVE). Did not copy code; used explanation to improve understanding of tool behaviour and how to apply it in the mission. |
