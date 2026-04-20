@@ -18,6 +18,7 @@
         "/backup.zip": 404,
         "/dev": 404,
         "/test": 404,
-        "/.env/config.php": 404
+        "/.env": 404,
+        "/config.php": 404
     }
 }

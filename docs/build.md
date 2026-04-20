@@ -837,11 +837,70 @@ Test against Metasploitable and document any discovered comments, headers, or pa
 Review output formatting to ensure consistency with assessment requirements
 Consider improving error handling and response interpretation (e.g., handling timeouts, redirects, and 403 responses more clearly)
 
+### [19-04-2026]
+
+
+**Decisions I made and why:**
+Added optional JSON output so the tool produces a structured evidence file as well as terminal output. This makes it easier to document findings, review results after testing, and use the recon data later during the exploit and fix planning stages.
+
 **Metasploitable web recon output:**
 
-**HTML comments found:**
+{
+    "target": "http://172.16.19.101",
+    "headers": {
+        "Server": "Apache/2.4.7 (Ubuntu)",
+        "X-Powered-By": "Not present"
+    },
+    "comments": [],
+    "sensitive_paths": {
+        "/robots.txt": 404,
+        "/admin": 404,
+        "/phpmyadmin": 301,
+        "/login": 404,
+        "/.git": 404,
+        "/drupal": 301,
+        "/drupal/CHANGELOG.txt": 200,
+        "/dbadmin": 404,
+        "/backup": 404,
+        "/backup.zip": 404,
+        "/dev": 404,
+        "/test": 404,
+        "/.env/config.php": 404
+    }
+}
 
-**Sensitive paths found:**
+This output shows that /drupal/CHANGELOG.txt is accessible because it returned 200 OK. This is useful because it exposes version information about the web application. It also showed that /drupal and /phpmyadmin returned 301, which suggests redirection rather than simple absence, so these paths may still be relevant.
+
+No HTML comments or exposed credentials were found on the main page, so the strongest web-based lead became the exposed Drupal changelog file rather than a direct credential leak.
+
+The next step was to manually access the discovered path:
+
+http://172.16.19.101/drupal/CHANGELOG.txt
+
+or retrieve it through curl:
+
+curl http://172.16.19.101/drupal/CHANGELOG.txt
+
+Reading the file revealed that the application is running Drupal 7.5. This is important because it provides a specific vulnerability research lead.
+
+As no credentials or comments were leaked, the next attack step was to research known CVEs affecting Drupal 7.5. During this research, CVE-2018-7600 was identified as a strong candidate attack path, because Drupal 7.5 falls within the affected version range for that vulnerability.
+
+**Attack process**
+This suggests a possible web exploitation path based on version disclosure. The vulnerability is associated with remote code execution through crafted HTTP requests in vulnerable Drupal versions.
+
+1.Confirm the target is exposing the Drupal application.
+2.Confirm the version using the changelog.
+3.Research and verify whether the target is likely vulnerable to CVE-2018-7600.
+4.Build an exploit that sends crafted HTTP requests to the vulnerable Drupal endpoint.
+5.Analyse the server response to determine whether exploitation is successful and whether the flag or target data can be retrieved.
+
+**Fix process**
+
+1.Confirm the target URL and Drupal path are valid.
+2.Remove or restrict public exposure of unnecessary version information such as CHANGELOG.txt.
+3.Patch or upgrade Drupal to a version no longer affected by the vulnerability.
+4.Re-test the target to confirm the vulnerable behaviour is no longer present.
+5.Verify that the previous version disclosure and exploit path are no longer available.
 
 ---
 

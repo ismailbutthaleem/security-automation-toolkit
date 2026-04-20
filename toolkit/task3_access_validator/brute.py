@@ -99,7 +99,7 @@ def parse_arguments():
         help="Optional port override (default: 21 FTP / 22 SSH)",
     )
 
-    # Default log file (pytest will use this automatically)
+    # Default log file
     parser.add_argument(
         "--output",
         type=Path,
@@ -143,6 +143,7 @@ def initialise_log(output_path: Path) -> None:
         sys.exit(1)
 
 
+# Log attempts to then produce a output file
 def log_attempt(output_path: Path, user: str, password: str, result: str) -> None:
     """
     Log each attempt to CSV (evidence trail).

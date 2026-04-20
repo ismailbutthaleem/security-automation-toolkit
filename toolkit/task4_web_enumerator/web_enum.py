@@ -77,8 +77,8 @@ This intelligence feeds directly into the Vulnerability Hunt diagnosis phase.
 # Your imports go here
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 try:
@@ -106,7 +106,8 @@ SENSITIVE_PATHS = [
     "/backup.zip",
     "/dev",
     "/test",
-    "/.env" "/config.php",
+    "/.env",
+    "/config.php",
 ]
 
 
@@ -155,7 +156,8 @@ def parse_arguments():
         help="Request timeout in seconds (default: 5)",
     )
     parser.add_argument(
-        "--output", type=Path, 
+        "--output",
+        type=Path,
         default=Path("web_results.json"),
     )
     return parser.parse_args()
@@ -258,15 +260,14 @@ def main():
     comments = extract_comments(response.text)
     path_results = check_sensitive_paths(args.url, args.timeout)
 
-
     # Save results to a JSON file
     save_results_to_json(
-    Path("web_enum_results.json"),
-    args.url,
-    headers,
-    comments,
-    path_results,
-)
+        Path("web_enum_results.json"),
+        args.url,
+        headers,
+        comments,
+        path_results,
+    )
 
     # Print formatted output
     print("[HEADERS]")
@@ -293,6 +294,8 @@ def main():
             print(f"{path:<16} → FOUND ({status_code})")
         elif status_code == 403:
             print(f"{path:<16} → Forbidden ({status_code})")
+        elif status_code == 301:
+            print(f"{path:<16} → Redirect ({status_code})")
         else:
             print(f"{path:<16} → NOT FOUND ({status_code})")
 
