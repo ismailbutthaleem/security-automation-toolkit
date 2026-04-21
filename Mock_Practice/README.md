@@ -1,8 +1,8 @@
 # The Benji Protocol — Mock Practice Report
 
-**Student Name:**
-**Student ID:**
-**Date:**
+**Student Name:** Ismail Butt
+**Student ID:** 2433887
+**Date:** 21-04-2026
 **Target:** Metasploitable (172.16.19.101)
 
 ---
@@ -79,17 +79,77 @@ The version identified (Drupal 7.5) is very outdated
 
 Although the exposed file itself is not the core vulnerability, it creates an information disclosure issue that makes further exploitation easier. An attacker can use this information to research known weaknesses for that specific version and build a targeted exploit. This confirms the vulnerability to be so far a misconfiguration although as mentioned before this drupal version is outdated tso it has a very high risk chance of having a software vulnerability within it.
 
-### Research CVE for Drupal 7.5
+VE Reference:
+SA-CORE-2018-002 / CVE-2018-7600
 
+This vulnerability allows an attacker to perform unauthorised remote code execution (RCE) on affected Drupal systems.
 
+The issue exists because Drupal does not properly validate user-supplied input in HTTP requests. An attacker can craft a malicious HTTP request containing specially structured payloads (render arrays) that the server processes incorrectly.
 
+These render array properties are intended for internal use within Drupal’s rendering system, not for direct user interaction. However, in vulnerable versions (Drupal 6–8), the application processes these values even when they are supplied through external requests.
 
+This means the server treats user input not just as data, but as executable instructions, which leads to unintended behaviour.
+
+As a result, an attacker can force the system to execute functions that should only be triggered internally by the application, effectively bypassing normal security controls and authentication checks.
+
+Impact of the Vulnerability
+
+Successful exploitation can result in full site compromise. An attacker may be able to:
+
+Read sensitive files (e.g. configuration files, credentials)
+Modify website content
+Upload backdoors or web shells
+Create administrative accounts
+Use the compromised system to pivot further into the network
+Render Array Properties Involved
+
+The vulnerability allows attackers to inject render array properties that should not be accessible through user input:
+
+#access_callback
+Used by Drupal to determine whether a user has access to an element.
+If abused, this could potentially be used to bypass access controls.
+
+#pre_render
+Executes before the rendering process.
+Can manipulate data before it is displayed.
+
+#lazy_builder
+Executes at the final stages of rendering.
+Used to dynamically generate content.
+
+#post_render
+Executes after rendering is complete.
+It can call functions on the output, making it particularly dangerous if controlled by an attacker.
+Exploitation Approach
+
+For this scenario, the most effective method is to use the #post_render property.
+
+This is because it allows an attacker to control which function is executed on the server. By crafting a malicious HTTP request that includes a #post_render parameter and supplying a command as input, the attacker can trigger execution of system-level functions.
+
+Due to the lack of proper input validation, Drupal processes these injected properties as part of its normal rendering workflow. This results in the execution of attacker-controlled code on the server.
 
 
 
 ### Evidence
 <!-- Commit reference or paste of the recon_results.json entry that identified the target service. -->
+The following output from web_enum.py confirms that the Drupal changelog file is publicly accessible:
 
+"sensitive_paths": {
+    "/drupal": 301,
+    "/drupal/CHANGELOG.txt": 200
+}
+
+The 200 response code indicates that the file is accessible without authentication.
+
+To confirm the version of Drupal running on the target, the following command was used:
+
+curl -s http://172.16.19.101/drupal/CHANGELOG.txt | head -n 10
+
+This returned:
+
+Drupal 7.5, 2011-07-27
+
+This provides direct evidence that the target is running an outdated Drupal version, which supports the identification of a potential software vulnerability.
 ---
 
 ## 2. Exploit
