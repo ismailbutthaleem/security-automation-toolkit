@@ -54,7 +54,7 @@ This command retrieves the file and prints only the first 10 lines, allowing qui
 The output was:
 
 Drupal 7.5, 2011-07-27
-----------------------
+
 - Fixed security issue (Access bypass), see SA-CORE-2011-003.
 
 From this, it can be confirmed that the application is running Drupal 7.5, released in 2011.
