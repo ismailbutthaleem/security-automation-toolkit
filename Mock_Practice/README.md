@@ -77,7 +77,11 @@ A sensitive file (CHANGELOG.txt) is publicly accessible
 This file reveals the exact Drupal version
 The version identified (Drupal 7.5) is very outdated
 
-Although the exposed file itself is not the core vulnerability, it creates an information disclosure issue that makes further exploitation easier. An attacker can use this information to research known weaknesses for that specific version and build a targeted exploit.
+Although the exposed file itself is not the core vulnerability, it creates an information disclosure issue that makes further exploitation easier. An attacker can use this information to research known weaknesses for that specific version and build a targeted exploit. This confirms the vulnerability to be so far a misconfiguration although as mentioned before this drupal version is outdated tso it has a very high risk chance of having a software vulnerability within it.
+
+### Research CVE for Drupal 7.5
+
+
 
 
 
