@@ -90,13 +90,13 @@ def parse_log(file_path: Path) -> list[dict]:
     password_pattern = re.compile(r"Failed password")
     invalid_user_pattern = re.compile(r"Invalid user")
 
-    # OPTIONAL extension (real-world logs)
+    # OPTIONAL extension PAM UNIX style
     pam_pattern = re.compile(r"authentication failure")
 
     # Extraction patterns
     ip_pattern = re.compile(r"\d+\.\d+\.\d+\.\d+")
     pam_ip_pattern = re.compile(r"rhost=(\d+\.\d+\.\d+\.\d+)")
-    pam_user_pattern = re.compile(r"user=(\S+)")
+    pam_user_pattern = re.compile(r"user=(\S+)")  # PAM UNIX style
 
     # Timestamp patterns (handles both syslog + ISO format)
     syslog_timestamp_pattern = re.compile(r"^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}")
@@ -189,6 +189,7 @@ def parse_log(file_path: Path) -> list[dict]:
     return records
 
 
+# Save results to a CSV file
 def write_csv(records: list[dict], output_path: Path) -> None:
     """
     Writes extracted records to CSV file.
