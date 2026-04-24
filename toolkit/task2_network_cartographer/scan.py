@@ -84,7 +84,6 @@ def parse_arguments():
     Required: target (positional IP address)
     Optional: --ports, --timeout, --threads, --output
     """
-    # TODO: Implement argparse
     # --ports should accept both ranges (1-1024) and lists (21,22,80)
 
     parser = argparse.ArgumentParser(description="parse ports")
@@ -120,7 +119,7 @@ def parse_port_input(port_string: str) -> list[int]:
     Raises:
         ValueError: If the format is unrecognised or ports are out of range.
     """
-    # TODO: Implement port range/list parsing
+    # Parse ports
 
     """
     Convert a port specification string into a sorted list of unique integers.
@@ -171,7 +170,6 @@ def grab_banner(sock: socket.socket, timeout: float = 0.5) -> str:
     Returns:
         Decoded banner string, or empty string if no banner received.
     """
-    # TODO: Implement banner grabbing
     # Handle: timeout, decode errors, empty response
     try:
         sock.settimeout(timeout)
@@ -196,7 +194,6 @@ def check_port(target: str, port: int, timeout: float) -> dict | None:
     Returns:
         Dict {"port": int, "banner": str} if open, None if closed/filtered.
     """
-    # TODO: Implement TCP connect attempt
     # On success: call grab_banner(), return result dict
     # On failure: return None (do not raise)
 
@@ -250,8 +247,11 @@ def valid_threads(value: str) -> int:
 def main():
     try:
         args = parse_arguments()
-        # TODO: Wire parse_arguments → parse_port_input → ThreadPoolExecutor
-        #       → collect results → write JSON output
+        # Wire parse_arguments
+        # Parse_port_input
+        # ThreadPoolExecutor
+        # Collect results
+        # Write JSON output
 
         try:
             ports = parse_port_input(args.ports)
