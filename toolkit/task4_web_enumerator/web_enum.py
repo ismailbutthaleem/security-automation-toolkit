@@ -101,6 +101,7 @@ SENSITIVE_PATHS = [
     "/.git",
     "/drupal",
     "/drupal/CHANGELOG.txt",
+    "/drupal/q=user",
     "/dbadmin",
     "/backup",
     "/backup.zip",

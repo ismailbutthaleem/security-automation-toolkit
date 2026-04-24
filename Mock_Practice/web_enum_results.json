@@ -1,0 +1,24 @@
+{
+    "target": "http://172.16.19.101",
+    "headers": {
+        "Server": "Apache/2.4.7 (Ubuntu)",
+        "X-Powered-By": "Not present"
+    },
+    "comments": [],
+    "sensitive_paths": {
+        "/robots.txt": 404,
+        "/admin": 404,
+        "/phpmyadmin": 301,
+        "/login": 404,
+        "/.git": 404,
+        "/drupal": 301,
+        "/drupal/CHANGELOG.txt": 200,
+        "/dbadmin": 404,
+        "/backup": 404,
+        "/backup.zip": 404,
+        "/dev": 404,
+        "/test": 404,
+        "/.env": 404,
+        "/config.php": 404
+    }
+}
