@@ -1011,7 +1011,7 @@ Modified exploit scaffold — focused only on payload + retrieval logic. Built r
 Automated the full chain (trigger → access → extract). Script successfully pulled flag from target without manual steps.
 
 FLAG:
-<PASTE_FLAG_HERE>
+<COM5413-20260424-0969-ETHAN-WAS-HERE-98604a763abe>
 
  — Remediation:
 Implemented fix by removing vulnerable functionality / blocking access (e.g. patched config, disabled feature, or restricted port). Re-tested to confirm exploit no longer works but service still running
