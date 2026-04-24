@@ -904,7 +904,82 @@ This suggests a possible web exploitation path based on version disclosure. The 
 
 ---
 
-### [DATE] — Session B
+### [17-04-2026] — Session B
+
+**What I built / changed:**
+
+This session was mainly the introduction to the mock exam. I ran my tools against the target to see how they behave in a more real scenario. I used the scanner and web enumerator to identify open ports, services, and web information. From the scan results I identified Drupal as the main target and started looking into the version and possible CVEs related to it.
+
+I also started thinking about how my exploit script will be structured for the actual mission, so I began sketching the scaffold (argument parsing, connection logic, etc.) instead of leaving it for the exam day.
+
+**What broke and how I fixed it:**
+
+Main issue wasn’t code breaking, it was understanding the exploit itself. I struggled with how the Drupal vulnerability actually works and how the payload should be structured.
+
+At first I didn’t understand how the request triggers execution, but after testing and looking at the behaviour, I realised Drupal processes certain render array functions. By sending a crafted HTTP request, the server processes it and executes what is passed inside it.
+
+Once I understood that flow (request → processed by Drupal → executes payload), it started making more sense.
+
+**Decisions I made and why:**
+
+I decided not to rely on memorising a payload, but instead focus on understanding how the exploit works. This is important because the exam scenario will be different.
+
+I also decided to start building my exploit scaffold early instead of leaving it to the mission day. This way I only need to adjust payloads and paths during the exam instead of writing everything from scratch under time pressure.
+
+**Questions or things to revisit:**
+
+Need to get more comfortable with how to build payloads for web-based exploits
+Still not 100% confident in structuring POST requests manually
+Need to practise extracting flags automatically after triggering the exploit
+
+### [22-04-2026 → 24-04-2026] — Exploit & Fix Development
+
+**What I built / changed:**
+
+Worked on building both exploit.py and fix.py.
+
+For the exploit:
+
+Built full scaffold (argparse, connection, flag extraction)
+Reused logic from brute tool for SSH access
+Added functions for username discovery and password finding
+Implemented reading remote files and extracting the flag using regex
+
+For the fix:
+
+Built remediation script structure with three main actions:
+remove credential exposure
+close access vector (password change)
+remove evidence
+Added verification step to confirm fixes worked and service is still running
+
+Also cleaned up code across tools (removed TODOs, fixed structure, improved comments).
+
+**What broke and how I fixed it:**
+
+Had multiple small issues during this period:
+
+Import issues between exploit and fix → fixed by making sure functions are reusable and paths are correct
+SSH connection failures → fixed by reusing working logic from brute tool
+Errors when reading remote files → handled with better error checking (stdout/stderr handling)
+General debugging of flow (making sure each step returns correct values before moving on)
+
+Main difficulty was not syntax, but making everything flow together properly.
+
+**Decisions I made and why:**
+
+I decided to reuse logic from previous tools (especially brute.py) instead of rewriting everything. This keeps consistency and reduces errors.
+
+I used AI for explanations, code correction
+
+I kept placeholders for paths (credential leak, evidence file) instead of hardcoding anything, so I can quickly adapt during the mission.
+
+I also added verification steps in fix.py because just running commands is not enough — I need to prove the system is actually secured after remediation.
+
+**Questions or things to revisit:**
+
+Developed a better sense of explotation and fix chain for the mission
+
 
 ---
 
