@@ -119,3 +119,28 @@ scanner against different inputs and verified JSON output remains correct. |
 |      |      |             |                   |                                |
 
 | Week 4 | Task 4 | Explain how the web_enum.py tool works and what I actually need to understand for the assignment | Broke down the tool into simple components (argparse, requests, BeautifulSoup, path checking) and explained the overall flow instead of focusing on memorising code. Clarified how the tool performs passive reconnaissance by reading headers, extracting HTML comments, and checking sensitive paths. Also explained how each part links to decision-making in the attack phase. | Reviewed explanation and reduced it to core flow: send request → analyse headers → extract comments → check paths → interpret results. Confirmed understanding of what each output means (200/403/404) and how it affects next steps (use creds, brute force, or CVE). Did not copy code; used explanation to improve understanding of tool behaviour and how to apply it in the mission. |
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+Week 4 | Task 3 & Exploit Scaffold | How should I structure my exploit.py using my brute.py logic without hardcoding anything | Explained breaking exploit into steps (argparse → discover user → brute password → SSH → read file → extract flag). Suggested reusing SSH/brute logic and keeping placeholders instead of fixed values. Also warned against hardcoding user/password. | I implemented my own version using my brute tool logic. I rejected hardcoding suggestions and kept username discovery + wordlist approach. Tested SSH connection flow separately to confirm it works. Adjusted functions so I understand each step instead of copying blindly.
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+Week 5 | Task 4 | Explain how web_enum.py works and what I actually need to understand for the mission | Broke the tool into simple flow (request → headers → comments → paths) and explained how each part links to recon decisions (finding versions, hidden info, entry points). | I reduced it to a simple flow I can remember. Tested tool against targets and checked outputs (200/403/404) to confirm I understand what each result means. Did not copy code, just used explanation to understand behaviour.
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+
+Week 5 | Exploit & Fix | Check my exploit.py and fix.py and tell me what is unnecessary or risky | Pointed out issues like duplicate main, unused functions, too many TODOs, and risky imports between files. Suggested simplifying logic and making code look complete. | I removed duplicate main, cleaned unused functions, replaced TODOs with proper comments, and simplified flow. Kept placeholders but made them intentional. Verified scripts run without errors and match assignment structure.
+
+| Week | Task | Prompt Used | AI Output Summary | My Verification / Changes Made |
+|------|------|-------------|-------------------|-------------------------------|
+|      |      |             |                   |                                |
+
+Week 5 | Documentation | Help me improve my build log writing and fix grammar without changing my tone | Helped structure entries into clear sections and improved grammar while keeping it simple and natural. | I rewrote my build log using my own wording, keeping it simple and direct. Checked that it reflects what I actually did instead of copying text.
