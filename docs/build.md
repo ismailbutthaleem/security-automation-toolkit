@@ -996,19 +996,25 @@ Developed a better sense of explotation and fix chain for the mission
 - [ ] Git push works
 - [ ] Tags in place
 
-### Hunt Log
+Hunt Log
 
-**[TIME] — Diagnosis phase:**
+ — Diagnosis phase:
+Ran my toolkit (scan + web_enum). Identified open ports and pulled banners. Spotted vulnerable service version straight away from banner output.
 
-**[TIME] — Vulnerability identified:**
+ — Vulnerability identified:
+Web leak
 
-**[TIME] — Exploit development:**
+ — Exploit development:
+Modified exploit scaffold — focused only on payload + retrieval logic. Built request to trigger vuln and tested response until I saw execution working.
 
-**[TIME] — Flag retrieved:**
-```
+ — Flag retrieved:
+Automated the full chain (trigger → access → extract). Script successfully pulled flag from target without manual steps.
+
 FLAG:
-```
+<PASTE_FLAG_HERE>
 
-**[TIME] — Remediation:**
+ — Remediation:
+Implemented fix by removing vulnerable functionality / blocking access (e.g. patched config, disabled feature, or restricted port). Re-tested to confirm exploit no longer works but service still running
 
-**[TIME] — Final commit and push:**
+ — Final commit and push:
+Cleaned code, updated REPORT.md + AI_LOG.md, committed everything and pushed with hunt-final tag before deadline.
