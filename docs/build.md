@@ -1,34 +1,4 @@
-# The Benji Protocol — Build Log
-**Student Name:** Ismail Butt Haleem
-**Student ID:** 2433887
-**GitHub Repository:**
 
----
-
-> "Benji documents everything. Not because he is asked to. Because a tool with
-> no history is a tool you cannot trust, and a mission with no record is a
-> mission that never happened."
-
-This is your running build log. Update it after every significant coding
-session. It is not an essay — it is a technical journal. Short entries are
-fine. No entry is not fine.
-
-The build log serves three purposes:
-1. It is evidence of your development process for the portfolio marker.
-2. It is your own reference when something breaks at 23:00 the night before
-   the Vulnerability Hunt.
-3. It demonstrates that the code in your repository is yours.
-
----
-
-## How to Use This Document
-
-Add a new entry for each session using the template below. Commit this file
-alongside your code — the build log and the code should tell the same story.
-
----
-
-## Entry Template
 
 ### [DATE] — [TASK / SESSION]
 
